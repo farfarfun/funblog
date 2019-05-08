@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 install_requires = []
 
 setup(name='noteblog',
-      version='0.0.1',
+      version='0.0.13',
       description='noteblog',
       author='niult',
       author_email='1007530194@qq.com',
