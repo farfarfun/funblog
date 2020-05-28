@@ -13,8 +13,9 @@ js utils
 from execjs import compile
 
 __all__ = [
-    'get_js_parser_res',        # python调用js, 并返回结果
+    'get_js_parser_res',  # python调用js, 并返回结果
 ]
+
 
 def get_js_parser_res(js_path, func_name, *args):
     '''
@@ -28,6 +29,6 @@ def get_js_parser_res(js_path, func_name, *args):
         js_code = f.read()
 
     js_parser = compile(js_code)
-    res = js_parser.call(func_name, *args)
+    res = js_parser.call(func_name, )
 
     return res

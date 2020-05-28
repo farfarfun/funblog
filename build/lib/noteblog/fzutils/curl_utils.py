@@ -13,10 +13,11 @@ curl utils
 import execjs
 
 __all__ = [
-    'curl_cmd_2_py_code',       # curl cmd to py code
+    'curl_cmd_2_py_code',  # curl cmd to py code
 ]
 
-def curl_cmd_2_py_code(curl_cmd:str) -> str:
+
+def curl_cmd_2_py_code(curl_cmd: str) -> str:
     '''
     curl cmd to py code
         使用前提:
@@ -39,6 +40,6 @@ def curl_cmd_2_py_code(curl_cmd:str) -> str:
     }
     '''
     js_parser = execjs.compile(js)
-    res = js_parser.call('a', curl_cmd)
+    res = js_parser.call('a', )
 
     return res

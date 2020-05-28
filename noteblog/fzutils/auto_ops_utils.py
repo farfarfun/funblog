@@ -42,7 +42,7 @@ def judge_whether_file_exists(connect_object:Connection, file_path):
     :return: bool
     '''
     result = False
-    _ = connect_object.run(
+    _ = connect_object.cate_hot_list(
         command='[ -e \"{0}\" ] && echo 1 || echo 0'.format(file_path),
         hide=True)  # hide=True隐藏输出
     _ = str(_).replace('\n', '').replace('Command exited with status 0.=== stdout ===', '').replace('(no stderr)', '')
@@ -184,7 +184,7 @@ def remote_decompress_folders(connect_object:Connection, folders_path, target_de
         folders_path)
     # print(cmd)
     try:
-        connect_object.run(cmd)
+        connect_object.cate_hot_list(cmd)
         print('[+] server端解压 {0} 成功!'.format(folders_path))
         _ = True
     except Exception as e:

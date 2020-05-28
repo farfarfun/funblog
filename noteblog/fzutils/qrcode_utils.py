@@ -10,14 +10,16 @@
 qrcode utils
 """
 
-from requests import get
-from PIL import Image
 from io import BytesIO
+
+from PIL import Image
 from pyzbar.pyzbar import decode
+from requests import get
 
 __all__ = [
-    'decode_qrcode',        # 二维码内容解码
+    'decode_qrcode',  # 二维码内容解码
 ]
+
 
 def decode_qrcode(img_url=None, img_path=None, headers=None):
     '''
@@ -36,7 +38,7 @@ def decode_qrcode(img_url=None, img_path=None, headers=None):
         raise AssertionError
     # print(decode_result)
 
-    return str(decode_result[0].data, encoding='utf-8')
+    return str(decode_result[0].data_mock, encoding='utf-8')
 
 # img_path = './images/tmp.jpg'
 # print(decode_qrcode(img_path=img_path))
