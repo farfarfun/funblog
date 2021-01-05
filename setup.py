@@ -1,17 +1,18 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2019/03/30 12:10
-# @Author  : niuliangtao
-# @Site    :
-# @File    : setup.py
-# @Software: PyCharm
+import sys
+from os import path
 
-from setuptools import setup, find_packages
+from notebuild.tool import get_version
+from setuptools import find_packages, setup
 
-install_requires = []
+version_path = path.join(path.abspath(
+    path.dirname(__file__)), 'script/__version__.md')
+
+version = get_version(sys.argv, version_path, step=16)
+
+install_requires = ['notedata']
 
 setup(name='noteblog',
-      version='0.0.13',
+      version=version,
       description='noteblog',
       author='niult',
       author_email='1007530194@qq.com',
