@@ -118,9 +118,10 @@ class PostAll:
 
 
 class BlogManage:
-    def __init__(self):
+    def __init__(self, path_root):
         self.cate_db = BlogCategoryDB()
         self.page_db = BlogPageDB()
+        self.path_root = path_root
 
     def insert_cate(self, tree: FileTree, parent_info: dict) -> dict:
         properties = {'describe': tree.name}
@@ -157,7 +158,7 @@ class BlogManage:
             self.insert_page({'path': file}, parent_info)
 
     def run(self):
-        files = get_all_file(path_root='/Users/new/workspace/myhub/content')
+        files = get_all_file(path_root=self.path_root)
         tree_root = {'cate_id': 0, 'cate_name': '根目录'}
         for f in files.categories:
             self.create_cate(f, tree_root)
