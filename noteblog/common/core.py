@@ -2,15 +2,13 @@
 import os
 import string
 from time import sleep
-from typing import List
 
 import nbformat
 import yaml
 from nbconvert import MarkdownExporter
+from noteblog.common.base import (BlogCategoryDB, BlogPageDB, FileTree,
+                                  PageDetail)
 from noteblog.typecho.core import Category, Post, Typecho
-from notedata.tables import SqliteTable
-
-from .base import BlogCategoryDB, BlogPageDB, CateDetail, FileTree, PageDetail
 
 
 def get_all_file(path_root) -> FileTree:
@@ -159,7 +157,7 @@ class BlogManage:
         files = get_all_file(path_root=self.path_root)
         tree_root = {'cate_id': 0, 'cate_name': '根目录'}
         for f in files.categories:
-            self.create_cate(f, tree_root)
+            self.local_scan_category(f, tree_root)
 
     def copy_category(self, copy_fun):
         for cate in self.cate_db.select_all():
