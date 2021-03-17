@@ -9,7 +9,7 @@ version_path = path.join(path.abspath(
 
 version = get_version(sys.argv, version_path, step=16)
 
-install_requires = ['notedata']
+install_requires = ['notebuild', 'notedata']
 
 setup(name='noteblog',
       version=version,
