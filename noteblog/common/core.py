@@ -116,9 +116,9 @@ class PostAll:
 
 
 class BlogManage:
-    def __init__(self, path_root):
-        self.cate_db = BlogCategoryDB()
-        self.page_db = BlogPageDB()
+    def __init__(self, path_root, db_path=None):
+        self.cate_db = BlogCategoryDB(db_path=db_path)
+        self.page_db = BlogPageDB(db_path=db_path)
         self.path_root = path_root
 
     def insert_cate(self, tree: FileTree, parent_info: dict) -> dict:
