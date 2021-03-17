@@ -146,17 +146,21 @@ class BlogManage:
 
         return self.page_db.select(condition=condition)[0]
 
-    def create_cate(self, tree: FileTree, parent_info: dict):
+    def local_scan_category(self, tree: FileTree, parent_info: dict):
         parent_info = self.insert_cate(tree, parent_info)
 
         for file in tree.categories:
-            self.create_cate(file, parent_info)
+            self.local_scan_category(file, parent_info)
 
         for file in tree.files:
             self.insert_page({'path': file}, parent_info)
 
-    def run(self):
+    def local_scan(self):
         files = get_all_file(path_root=self.path_root)
         tree_root = {'cate_id': 0, 'cate_name': '根目录'}
         for f in files.categories:
             self.create_cate(f, tree_root)
+
+    def copy_category(self, copy_fun):
+        for cate in self.cate_db.select_all():
+            print(cate)
