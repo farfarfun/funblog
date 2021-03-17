@@ -9,7 +9,7 @@ class PublishBase(meteaclass=ABCMeta):
         self.name = name
 
     @abstractmethod
-    def get_pages(self, *args, **kwargs):
+    def get_pages(self, nums=10, *args, **kwargs):
         raise Exception("not implement")
 
     @abstractmethod
@@ -29,7 +29,7 @@ class PublishBase(meteaclass=ABCMeta):
         raise Exception("not implement")
 
     @abstractmethod
-    def get_cates(self, *args, **kwargs):
+    def get_cates(self, nums=10, *args, **kwargs):
         raise Exception("not implement")
 
     @abstractmethod
