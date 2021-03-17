@@ -7,10 +7,9 @@ from typing import List
 import nbformat
 import yaml
 from nbconvert import MarkdownExporter
-from notedata.tables import SqliteTable
-from notetypecho.core import Category, Post, Typecho
-
+from noteblog.core import Category, Post, Typecho
 from noteblog.typecho.core import Typecho
+from notedata.tables import SqliteTable
 
 from .base import BlogCategoryDB, BlogPageDB, CateDetail, FileTree, PageDetail
 
