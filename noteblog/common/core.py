@@ -78,9 +78,14 @@ class BlogManage:
     def publish_cate(self, blog: PublishBase, key='cate_typecho_id'):
         for cate in self.cate_db.select_all():
             if cate[key] <= 0:
+                parent_id = cate['parent_id']
+                if parent_id != 0:
+                    res = self.cate_db.select(condition={'cate_id': parent_id})
+                    if len(res) > 0:
+                        parent_id = res[0][key]
                 _cate = Cate(
                     cate_name=cate['cate_name'],
-                    parent_id=cate['parent_id']
+                    parent_id=parent_id
                 )
                 cate_id = blog.new_cate(_cate)
                 cate[key] = cate_id
