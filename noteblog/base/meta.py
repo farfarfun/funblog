@@ -20,7 +20,7 @@ class Cate(Meta):
 
 
 class Page(Meta):
-    def __init__(self, page_id=None, title=None, categories=None, description=None, tags=None, *args, **kwargs):
+    def __init__(self, page_id=None, title=None, categories=None, describe=None, tags=None, *args, **kwargs):
         self.page_id = page_id
         self.title = title
         self.describe = describe
