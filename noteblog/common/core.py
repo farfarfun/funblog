@@ -92,7 +92,7 @@ class BlogManage:
             if page[key] <= 0:
                 _page = Page(
                     title=page['title'],
-                    description=page['description'],
+                    describe=page['describe'],
                     tags=page['tags'],
                     categories=page['cate_name'],
                 )

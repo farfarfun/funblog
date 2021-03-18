@@ -23,7 +23,7 @@ class Page(Meta):
     def __init__(self, page_id=None, title=None, categories=None, description=None, tags=None, *args, **kwargs):
         self.page_id = page_id
         self.title = title
-        self.description = description
+        self.describe = describe
         self.tags = tags
         self.categories = categories
         super(Page, self).__init__(*args, **kwargs)
