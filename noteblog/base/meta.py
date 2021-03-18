@@ -9,7 +9,10 @@ class Meta:
 
 
 class Cate(Meta):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, cate_id=None, cate_name=None, parent_id=None, *args, **kwargs):
+        self.cate_id = cate_id
+        self.cate_name = cate_name
+        self.parent_id = parent_id
         super(Cate, self).__init__(*args, **kwargs)
 
 
