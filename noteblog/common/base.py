@@ -159,16 +159,16 @@ class BlogPageDB(SqliteTable):
         self.execute("""
                 create table if not exists {} (
                 page_id             integer       primary key AUTOINCREMENT 
-               ,page_uid            varchar(200)  DEFAULT ('')
-               ,title               varchar(200)  DEFAULT ('')
-               ,sub_title           varchar(200)  DEFAULT ('')
-               ,describe            varchar(5000) DEFAULT ('')
-               ,cate_id             integer       DEFAULT (-1)     
-               ,cate_name           varchar(200)  DEFAULT ('')
-               ,page_typecho_id     integer       DEFAULT (-1)           
-               ,page_yuque_id       integer       DEFAULT (-1)
-               ,path                varchar(2000) DEFAULT ('')
-               ,tags                varchar(2000) DEFAULT ('')
+               ,page_uid            varchar(200)   DEFAULT ('')
+               ,title               varchar(200)   DEFAULT ('')
+               ,sub_title           varchar(200)   DEFAULT ('')
+               ,describe            varchar(50000) DEFAULT ('')
+               ,cate_id             integer        DEFAULT (-1)     
+               ,cate_name           varchar(200)   DEFAULT ('')
+               ,page_typecho_id     integer        DEFAULT (-1)           
+               ,page_yuque_id       integer        DEFAULT (-1)
+               ,path                varchar(2000)  DEFAULT ('')
+               ,tags                varchar(2000)  DEFAULT ('')
         )
         """.format(self.table_name))
 
