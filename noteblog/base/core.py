@@ -4,7 +4,10 @@ from typing import Dict, List, Optional
 from.meta import Cate, Page
 
 
-class PublishBase(meteaclass=ABCMeta):
+class PublishBase(object):
+    def __init__(self, name='default', *args, **kwargs):
+        self.name = name
+
     @abstractmethod
     def get_pages(self, nums=10, *args, **kwargs):
         raise Exception("not implement")
