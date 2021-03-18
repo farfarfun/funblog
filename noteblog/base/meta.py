@@ -15,7 +15,7 @@ class Cate(Meta):
 
 class Page(Meta):
     def __init__(self, page_id=None, title=None, description=None, *args, **kwargs):
-        page_id = None
-        title = None
-        description = None
+        self.page_id = page_id
+        self.title = title
+        self.description = description
         super(Page, self).__init__(*args, **kwargs)
