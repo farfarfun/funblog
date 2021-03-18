@@ -5,9 +5,6 @@ from.meta import Cate, Page
 
 
 class PublishBase(meteaclass=ABCMeta):
-    def __init__(self, name='default', *args, **kwargs):
-        self.name = name
-
     @abstractmethod
     def get_pages(self, nums=10, *args, **kwargs):
         raise Exception("not implement")
