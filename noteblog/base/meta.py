@@ -2,6 +2,9 @@ class Meta:
     def __init__(self, *args, **kwargs):
         pass
 
+    def update(self, variable: dict):
+        self.__dict__.update(variable)
+
     def to_dict(self):
         res = {}
         res.update(self.__dict__)
