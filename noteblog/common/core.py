@@ -77,7 +77,7 @@ class BlogManage:
 
     def publish_cate(self, blog: PublishBase, key='cate_typecho_id'):
         for cate in self.cate_db.select_all():
-            if cate[key] == 0:
+            if cate[key] <= 0:
                 _cate = Cate(
                     cate_name=cate['cate_name'],
                     parent_id=cate['parent_id']
@@ -89,7 +89,7 @@ class BlogManage:
 
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
         for page in self.page_db.select_all():
-            if page[key] == 0:
+            if page[key] <= 0:
                 _page = Page(title=page['title'])
                 page_id = blog.new_page(_page)
                 page[key] = page_id
