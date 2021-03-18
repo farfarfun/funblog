@@ -7,7 +7,6 @@ from typing import List
 import nbformat
 import yaml
 from nbconvert import MarkdownExporter
-from noteblog.typecho.core import Category, Post, Typecho
 from notedata.tables import SqliteTable
 
 
