@@ -1,11 +1,8 @@
 # coding=utf-8
 import os
-import string
-from time import sleep
 
-import nbformat
-import yaml
-from nbconvert import MarkdownExporter
+from noteblog.base.core import PublishBase
+from noteblog.base.meta import Cate, Page
 from noteblog.common.base import (BlogCategoryDB, BlogPageDB, FileTree,
                                   PageDetail)
 
@@ -76,6 +73,23 @@ class BlogManage:
         for f in files.categories:
             self.local_scan_category(f, tree_root)
 
-    def copy_category(self, copy_fun):
+    def publish_cate(self, blog: PublishBase, key='cate_typecho_id'):
         for cate in self.cate_db.select_all():
-            print(cate)
+            if cate[key] == 0:
+                _cate = Cate(
+                    cate_name=cate['cate_name'],
+                    parent_id=cate['parent_id']
+                )
+                cate_id = blog.new_cate(_cate)
+                cate[key] = cate_id
+                self.cate_db.update(
+                    cate, condition={'cate_id': cate['cate_id']})
+
+    def publish_page(self, blog: PublishBase, key='page_typecho_id'):
+        for page in self.page_db.select_all():
+            if page[key] == 0:
+                _page = Page(title=page['title'])
+                page_id = blog.new_page(_page)
+                page[key] = page_id
+                self.page_db.update(
+                    page, condition={'page_id': page['page_id']})
