@@ -43,4 +43,3 @@ class TypechoPB(PublishBase):
         pass
 
 
-a = TypechoPB(None)
