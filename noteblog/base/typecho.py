@@ -2,7 +2,7 @@ from noteblog.base.core import PublishBase
 from noteblog.base.meta import Cate, Page
 from noteblog.blog.typecho import Typecho
 from noteblog.blog.typecho.models import Category as TypeCate
-from noteblog.blog.typecho.models import Page as TypePage
+from noteblog.blog.typecho.models import Post as TypePost
 
 
 class TypechoPB(PublishBase):
@@ -11,8 +11,8 @@ class TypechoPB(PublishBase):
         self.typecho: Typecho = typecho
 
     @staticmethod
-    def page_transform(page: Page) -> TypePage:
-        type_page = TypePage(
+    def page_transform(page: Page) -> TypePost:
+        type_page = TypePost(
             title=page.title,
             description=page.description,
             # categories=[],
@@ -34,10 +34,10 @@ class TypechoPB(PublishBase):
         return self.typecho.get_page(page_id)
 
     def new_page(self, page: Page, *args, **kwargs):
-        return self.typecho.new_page(self.page_transform(page), True)
+        return self.typecho.new_post(self.page_transform(page), True)
 
     def edit_page(self, page_id, page: Page, *args, **kwargs):
-        return self.typecho.edit_page(self.page_transform(page), page_id, True)
+        return self.typecho.edit_post(self.page_transform(page), page_id, True)
 
     def del_page(self, page_id, *args, **kwargs):
         pass
