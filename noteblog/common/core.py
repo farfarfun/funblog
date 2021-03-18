@@ -3,6 +3,8 @@ import os
 
 from noteblog.base.core import PublishBase
 from noteblog.base.meta import Cate, Page
+from noteblog.base.typecho import TypechoPB
+from noteblog.blog.typecho import Typecho
 from noteblog.common.base import (BlogCategoryDB, BlogPageDB, FileTree,
                                   PageDetail)
 
@@ -93,3 +95,10 @@ class BlogManage:
                 page[key] = page_id
                 self.page_db.update(
                     page, condition={'page_id': page['page_id']})
+
+    def publish_typecho(self, rpc_url: str, username: str, password: str):
+        typecho = Typecho(rpc_url=rpc_url, username=username,
+                          password=password)
+        typecho_pb = TypechoPB(typecho)
+        self.publish_cate(typecho_pb, key='cate_typecho_id')
+        self.publish_page(typecho_pb, key='page_typecho_id')
