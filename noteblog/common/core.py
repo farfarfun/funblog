@@ -99,7 +99,7 @@ class BlogManage:
                     title=page['title'],
                     describe=page['describe'],
                     tags=page['tags'],
-                    categories=page['cate_name'],
+                    categories=[page['cate_name']],
                 )
                 page_id = blog.new_page(_page)
                 page[key] = page_id
