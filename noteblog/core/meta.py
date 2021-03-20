@@ -130,7 +130,8 @@ class PageDetail:
         elif filetype == '.md':
             content = open(self.path, 'r').read()
         else:
-            raise NotImplementedError("error {}".format(filetype))
+            #raise NotImplementedError("error {}".format(filetype))
+            content = ""
 
         return content
 
