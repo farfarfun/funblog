@@ -1,7 +1,6 @@
 # coding=utf-8
 import os
 import string
-from time import sleep
 from typing import List
 
 import nbformat
@@ -65,44 +64,71 @@ class PageDetail:
     def name_convent(name: str) -> str:
         return name.lstrip(string.digits).lstrip('|_-|.')
 
+    def _read_ipynb(self, insert_mark=True, fill_mark=True):
+        filename, filetype = os.path.splitext(os.path.basename(self.path))
+
+        mark = MarkdownExporter()
+        jake_notebook = nbformat.reads(
+            open(self.path, 'r').read(), as_version=4)
+        content, _ = mark.from_notebook_node(jake_notebook)
+        if len(jake_notebook.cells) == 0:
+            return content
+
+        source = str(jake_notebook.cells[0].source)
+        # 插入头部
+        if not source.startswith('- ') and insert_mark:
+            cell = jake_notebook.cells[0].copy()
+            cell.source = """- title: {filename}""".format(filename=filename)
+            cell.cell_type = 'markdown'
+
+            jake_notebook.cells.insert(0, cell)
+            self.writes(nbformat.writes(jake_notebook))
+            jake_notebook = nbformat.reads(
+                open(self.path, 'r').read(), as_version=4)
+            content, _ = mark.from_notebook_node(jake_notebook)
+            source = str(jake_notebook.cells[0].source)
+
+        # 信息补全
+        if source.startswith('- ') and fill_mark:
+            # cell = jake_notebook.cells[0]
+            # cell.source = """- title: {filename}""".format(filename=filename)
+            # cell.cell_type = 'markdown'
+            #
+            # self.writes(nbformat.writes(jake_notebook))
+            # jake_notebook = nbformat.reads(open(self.path, 'r').read(), as_version=4)
+            # content, _ = mark.from_notebook_node(jake_notebook)
+            # source = str(jake_notebook.cells[0].source)
+            pass
+
+        # 导入头部定义的变量
+        if source.startswith('- '):
+            try:
+                s = yaml.load(source)
+                res = {}
+                [res.update(i) for i in s]
+
+                self.title = self.name_convent(res.get("title", filename))
+                self.tags = res.get("tags", '')
+                del jake_notebook.cells[0]
+                content, _ = mark.from_notebook_node(jake_notebook)
+            except Exception as e:
+                print(e)
+
+        return content
+
     def read_page(self):
         filename, filetype = os.path.splitext(os.path.basename(self.path))
 
         self.title = self.name_convent(filename)
 
         if filetype == '.ipynb':
-            jake_notebook = nbformat.reads(
-                open(self.path, 'r').read(), as_version=4)
-            mark = MarkdownExporter()
-            content, _ = mark.from_notebook_node(jake_notebook)
-            # check title
-            if len(jake_notebook.cells) >= 1:
-                source = str(jake_notebook.cells[0].source)
-                if source.startswith('- '):
-                    try:
-                        s = yaml.load(source)
-                        res = {}
-                        [res.update(i) for i in s]
-
-                        self.title = self.name_convent(
-                            res.get("title", filename))
-                        self.tags = res.get("tags", '')
-                        del jake_notebook.cells[0]
-                        content, _ = mark.from_notebook_node(jake_notebook)
-                    except Exception as e:
-                        print(e)
-                else:
-                    cell = jake_notebook.cells[0].copy()
-                    cell.source = """- title: {filename}""".format(
-                        filename=filename)
-                    cell.cell_type = 'markdown'
-
-                    jake_notebook.cells.insert(0, cell)
-                    self.writes(nbformat.writes(jake_notebook))
+            content = self._read_ipynb()
         elif filetype == '.md':
             content = open(self.path, 'r').read()
         else:
             raise NotImplementedError("error {}".format(filetype))
+
+        return content
 
     def insert_page(self, file_info: dict, cate_info: dict = None):
         self.path = file_info['path']
