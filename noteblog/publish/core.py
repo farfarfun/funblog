@@ -1,12 +1,14 @@
 # coding=utf-8
 import os
 
-from noteblog.base.core import PublishBase
-from noteblog.base.meta import Cate, Page
-from noteblog.base.typecho import TypechoPB
 from noteblog.blog.typecho import Typecho
-from noteblog.common.base import (BlogCategoryDB, BlogPageDB, FileTree,
-                                  PageDetail)
+from noteblog.core.base import PublishBase
+from noteblog.core.meta import BlogCategoryDB, BlogPageDB
+from noteblog.core.meta import CateDetail as Cate
+from noteblog.core.meta import FileTree
+from noteblog.core.meta import PageDetail as Page
+
+from .typecho import TypechoPB
 
 
 def get_all_file(path_root) -> FileTree:
@@ -94,6 +96,7 @@ class BlogManage:
 
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
         for page in self.page_db.select_all():
+            #page = PageDetail(page)
             if page[key] <= 0:
                 _page = Page(
                     title=page['title'],

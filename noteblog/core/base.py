@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Optional
 
-from.meta import Cate, Page
+from .meta import CateDetail as Cate
+from .meta import PageDetail as Page
 
 
 class PublishBase(object):

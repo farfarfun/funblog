@@ -1,8 +1,10 @@
-from noteblog.base.core import PublishBase
-from noteblog.base.meta import Cate, Page
 from noteblog.blog.typecho import Typecho
 from noteblog.blog.typecho.models import Category as TypeCate
 from noteblog.blog.typecho.models import Post as TypePost
+from noteblog.core.meta import CateDetail as Cate
+from noteblog.core.meta import PageDetail as Page
+
+from .core import PublishBase
 
 
 class TypechoPB(PublishBase):
