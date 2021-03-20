@@ -16,7 +16,7 @@ class TypechoPB(PublishBase):
     def page_transform(page: Page) -> TypePost:
         type_page = TypePost(
             title=page.title,
-            description=page.describe,
+            description=page.content,
             categories=[page.cate_name],
         )
         return type_page

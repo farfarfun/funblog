@@ -116,6 +116,10 @@ class PageDetail:
 
         return content
 
+    @property
+    def content(self):
+        return self.read_page()
+
     def read_page(self):
         filename, filetype = os.path.splitext(os.path.basename(self.path))
 
