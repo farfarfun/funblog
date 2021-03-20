@@ -17,7 +17,7 @@ class TypechoPB(PublishBase):
         type_page = TypePost(
             title=page.title,
             description=page.describe,
-            categories=page.categories,
+            categories=[page.cate_name],
         )
         return type_page
 
