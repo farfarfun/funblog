@@ -3,10 +3,8 @@ import os
 
 from noteblog.blog.typecho import Typecho
 from noteblog.core.base import PublishBase
-from noteblog.core.meta import BlogCategoryDB, BlogPageDB
-from noteblog.core.meta import CateDetail as Cate
-from noteblog.core.meta import FileTree
-from noteblog.core.meta import PageDetail as Page
+from noteblog.core.meta import (BlogCategoryDB, BlogPageDB, CateDetail,
+                                FileTree, PageDetail)
 
 from .typecho import TypechoPB
 
@@ -84,11 +82,8 @@ class BlogManage:
                 if parent_id != 0:
                     res = self.cate_db.select(condition={'cate_id': parent_id})
                     if len(res) > 0:
-                        parent_id = res[0][key]
-                _cate = Cate(
-                    cate_name=cate['cate_name'],
-                    parent_id=parent_id
-                )
+                        cate['parent_id'] = res[0][key]
+                _cate = CateDetail(**cate)
                 cate_id = blog.new_cate(_cate)
                 cate[key] = cate_id
                 self.cate_db.update(
@@ -96,15 +91,9 @@ class BlogManage:
 
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
         for page in self.page_db.select_all():
-            #page = PageDetail(page)
             if page[key] <= 0:
-                _page = Page(
-                    title=page['title'],
-                    describe=page['describe'],
-                    tags=page['tags'],
-                    categories=[page['cate_name']],
-                )
                 page_id = blog.new_page(_page)
+                _page = PageDetail(**page)
                 page[key] = page_id
                 self.page_db.update(
                     page, condition={'page_id': page['page_id']})
