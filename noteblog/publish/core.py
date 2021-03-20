@@ -83,7 +83,7 @@ class BlogManage:
                     res = self.cate_db.select(condition={'cate_id': parent_id})
                     if len(res) > 0:
                         cate['parent_id'] = res[0][key]
-                _cate = CateDetail(kwargs=cate)
+                _cate = CateDetail(**cate)
                 cate_id = blog.new_cate(_cate)
                 cate[key] = cate_id
                 self.cate_db.update(
@@ -92,7 +92,7 @@ class BlogManage:
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
         for page in self.page_db.select_all():
             if page[key] <= 0:
-                _page = PageDetail(kwargs=page)
+                _page = PageDetail(**page)
                 page_id = blog.new_page(_page)
                 page[key] = page_id
                 self.page_db.update(
