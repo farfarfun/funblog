@@ -92,8 +92,8 @@ class BlogManage:
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
         for page in self.page_db.select_all():
             if page[key] <= 0:
-                page_id = blog.new_page(_page)
                 _page = PageDetail(**page)
+                page_id = blog.new_page(_page)
                 page[key] = page_id
                 self.page_db.update(
                     page, condition={'page_id': page['page_id']})
