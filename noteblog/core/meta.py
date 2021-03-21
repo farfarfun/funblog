@@ -1,10 +1,10 @@
 # coding=utf-8
 import os
 import string
+import uuid
 from typing import List
 
 import nbformat
-import yaml
 from nbconvert import MarkdownExporter
 from notedata.tables import SqliteTable
 
@@ -32,6 +32,7 @@ class CateDetail:
 class PageDetail:
     def __init__(self, *args, **kwargs):
         self.page_id = 0
+        self.page_uid = ""
         self.title = ''
         self.sub_title = ''
         self.describe = ''
@@ -41,6 +42,8 @@ class PageDetail:
         self.page_yuque_id = 0
         self.path = ''
         self.tags = ''
+        self.modify_time = ""
+        self.create_time = ""
 
         self.from_dict(kwargs)
 
@@ -64,9 +67,45 @@ class PageDetail:
     def name_convent(name: str) -> str:
         return name.lstrip(string.digits).lstrip('|_-|.')
 
-    def _read_ipynb(self, insert_mark=True, fill_mark=True):
-        filename, filetype = os.path.splitext(os.path.basename(self.path))
+    def _head_info_str(self):
+        head_info = {}
+        if self.title is not None:
+            head_info['title'] = self.title
+        if self.tags is not None:
+            head_info['tags'] = ','.join(self.tags)
+        if self.page_uid is not None:
+            head_info['uid'] = ','.join(self.page_uid)
 
+        return '\n'.join(['- {}: {}'.format(k, v) for k, v in head_info.items()])
+
+    def _head_info_parse(self, info: str = None):
+        head_info = {}
+        if info is None:
+            return
+        for line in info.split("\n"):
+            line = line.strip()
+            if line.startswith('-'):
+                line = line[1:].strip()
+
+                if ':' in line:
+                    i = line.index(':')
+                    key, value = line[:i], line[i + 1:]
+                    head_info[key] = value
+        if 'uid' in head_info.keys():
+            self.page_uid = head_info['uid']
+        if 'title' in head_info.keys():
+            self.title = head_info['title']
+        if 'tags' in head_info.keys():
+            self.tags = head_info['tags'].split(',')
+        if 'author' in head_info.keys():
+            self.author = head_info['author']
+        if 'create_time' in head_info.keys():
+            self.create_time = head_info['create_time']
+        if 'modify_time' in head_info.keys():
+            self.modify_time = head_info['modify_time']
+        return head_info
+
+    def _read_ipynb(self, insert_mark=True, fill_mark=True):
         mark = MarkdownExporter()
         jake_notebook = nbformat.reads(
             open(self.path, 'r').read(), as_version=4)
@@ -75,62 +114,43 @@ class PageDetail:
             return content
 
         source = str(jake_notebook.cells[0].source)
-        # 插入头部
-        if not source.startswith('- ') and insert_mark:
-            cell = jake_notebook.cells[0].copy()
-            cell.source = """- title: {filename}""".format(filename=filename)
-            cell.cell_type = 'markdown'
-
-            jake_notebook.cells.insert(0, cell)
-            self.writes(nbformat.writes(jake_notebook))
-            jake_notebook = nbformat.reads(
-                open(self.path, 'r').read(), as_version=4)
-            content, _ = mark.from_notebook_node(jake_notebook)
-            source = str(jake_notebook.cells[0].source)
-
-        # 信息补全
-        if source.startswith('- ') and fill_mark:
-            # cell = jake_notebook.cells[0]
-            # cell.source = """- title: {filename}""".format(filename=filename)
-            # cell.cell_type = 'markdown'
-            #
-            # self.writes(nbformat.writes(jake_notebook))
-            # jake_notebook = nbformat.reads(open(self.path, 'r').read(), as_version=4)
-            # content, _ = mark.from_notebook_node(jake_notebook)
-            # source = str(jake_notebook.cells[0].source)
-            pass
 
         # 导入头部定义的变量
         if source.startswith('- '):
             try:
-                s = yaml.load(source)
-                res = {}
-                [res.update(i) for i in s]
-
-                self.title = self.name_convent(res.get("title", filename))
-                self.tags = res.get("tags", '')
+                self._head_info_parse(source)
                 del jake_notebook.cells[0]
                 content, _ = mark.from_notebook_node(jake_notebook)
             except Exception as e:
-                print(e)
+                print("error 11111 : {}".format(e))
+
+        # 信息补全
+        if (source.startswith('- ') and fill_mark) or (not source.startswith('- ') and insert_mark):
+            cell = jake_notebook.cells[0].copy()
+            cell.source = self._head_info_str()
+            cell.cell_type = 'markdown'
+
+            jake_notebook.cells.insert(0, cell)
+            self.writes(nbformat.writes(jake_notebook))
 
         return content
 
     @property
     def content(self):
-        return self.read_page()
+        return self.init_page()
 
-    def read_page(self):
+    def init_page(self):
         filename, filetype = os.path.splitext(os.path.basename(self.path))
 
         self.title = self.name_convent(filename)
+        self.page_uid = str(uuid.uuid1())
 
         if filetype == '.ipynb':
             content = self._read_ipynb()
         elif filetype == '.md':
             content = open(self.path, 'r').read()
         else:
-            #raise NotImplementedError("error {}".format(filetype))
+            # raise NotImplementedError("error {}".format(filetype))
             content = ""
 
         return content
@@ -140,7 +160,7 @@ class PageDetail:
         self.cate_id = cate_info['cate_id']
         self.cate_name = cate_info['cate_name']
 
-        self.read_page()
+        self.init_page()
 
 
 class BlogCategoryDB(SqliteTable):

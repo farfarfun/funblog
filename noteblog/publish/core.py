@@ -5,6 +5,7 @@ from noteblog.blog.typecho import Typecho
 from noteblog.core.base import PublishBase
 from noteblog.core.meta import (BlogCategoryDB, BlogPageDB, CateDetail,
                                 FileTree, PageDetail)
+from tqdm import tqdm
 
 from .typecho import TypechoPB
 
@@ -76,7 +77,7 @@ class BlogManage:
             self.local_scan_category(f, tree_root)
 
     def publish_cate(self, blog: PublishBase, key='cate_typecho_id'):
-        for cate in self.cate_db.select_all():
+        for cate in tqdm(self.cate_db.select_all()):
             if cate[key] <= 0:
                 parent_id = cate['parent_id']
                 if parent_id != 0:
@@ -90,7 +91,7 @@ class BlogManage:
                     cate, condition={'cate_id': cate['cate_id']})
 
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
-        for page in self.page_db.select_all():
+        for page in tqdm(self.page_db.select_all()):
             if page[key] <= 0:
                 _page = PageDetail(**page)
                 page_id = blog.new_page(_page)
