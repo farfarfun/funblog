@@ -96,7 +96,7 @@ class PageDetail:
         if 'title' in head_info.keys():
             self.title = head_info['title']
         if 'tags' in head_info.keys():
-            self.tags = head_info['tags'].split(',')
+            self.tags = head_info['tags']
         if 'author' in head_info.keys():
             self.author = head_info['author']
         if 'create_time' in head_info.keys():
