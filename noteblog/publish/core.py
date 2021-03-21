@@ -5,9 +5,8 @@ from noteblog.blog.typecho import Typecho
 from noteblog.core.base import PublishBase
 from noteblog.core.meta import (BlogCategoryDB, BlogPageDB, CateDetail,
                                 FileTree, PageDetail)
+from noteblog.publish.typecho import TypechoPB
 from tqdm import tqdm
-
-from .typecho import TypechoPB
 
 
 def get_all_file(path_root) -> FileTree:
@@ -51,13 +50,20 @@ class BlogManage:
         page.insert_page(file_info=properties, cate_info=cate_info)
         properties.update(page.to_dict())
 
-        condition = {
-            'title': properties['title'],
-            'cate_id': properties['cate_id']
-        }
-
-        self.page_db.update_or_insert(
-            properties=properties, condition=condition)
+        is_update = False
+        condition = {}
+        if page.page_uid is not None:
+            condition = {"page_uid": page.page_uid}
+            up = self.page_db.update(properties, condition)
+            if up.rowcount > 0:
+                is_update = True
+        if not is_update:
+            condition = {
+                'title': properties['title'],
+                'cate_id': properties['cate_id']
+            }
+            self.page_db.update_or_insert(
+                properties=properties, condition=condition)
 
         return self.page_db.select(condition=condition)[0]
 
@@ -98,6 +104,9 @@ class BlogManage:
                 page[key] = page_id
                 self.page_db.update(
                     page, condition={'page_id': page['page_id']})
+            else:
+                _page = PageDetail(**page)
+                blog.edit_page(page_id=_page.page_id, page=_page)
 
     def publish_typecho(self, rpc_url: str, username: str, password: str):
         typecho = Typecho(rpc_url=rpc_url, username=username,
