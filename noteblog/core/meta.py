@@ -129,6 +129,7 @@ class PageDetail:
             cell = jake_notebook.cells[0].copy()
             cell.source = self._head_info_str()
             cell.cell_type = 'markdown'
+            cell.id = 'tribal-finnish'
 
             jake_notebook.cells.insert(0, cell)
             self.writes(nbformat.writes(jake_notebook))
