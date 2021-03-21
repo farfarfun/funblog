@@ -74,7 +74,7 @@ class PageDetail:
         if self.tags is not None:
             head_info['tags'] = ','.join(self.tags)
         if self.page_uid is not None:
-            head_info['uid'] = ','.join(self.page_uid)
+            head_info['uid'] = self.page_uid
 
         return '\n'.join(['- {}: {}'.format(k, v) for k, v in head_info.items()])
 
