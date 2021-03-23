@@ -70,13 +70,13 @@ class PageDetail:
     def _head_info_str(self):
         head_info = {}
         if self.title is not None:
-            head_info['title'] = self.title
+            head_info['title'] = self.title.strip()
         if self.tags is not None:
             head_info['tags'] = ','.join(self.tags)
         if self.page_uid is not None:
-            head_info['uid'] = self.page_uid.replace('-', '')
+            head_info['uid'] = self.page_uid.replace('-', '').strip()
 
-        return '\n'.join(['- {}: {}'.format(k, v) for k, v in head_info.items()])
+        return '\n'.join(['- {}: {}'.format(k, v) for k, v.strip() in head_info.items()])
 
     def _head_info_parse(self, info: str = None):
         head_info = {}
@@ -92,17 +92,17 @@ class PageDetail:
                     key, value = line[:i], line[i + 1:]
                     head_info[key] = value
         if 'uid' in head_info.keys():
-            self.page_uid = head_info['uid'].replace('-', '')
+            self.page_uid = head_info['uid'].replace('-', '').strip()
         if 'title' in head_info.keys():
-            self.title = head_info['title']
+            self.title = head_info['title'].strip()
         if 'tags' in head_info.keys():
-            self.tags = head_info['tags']
+            self.tags = head_info['tags'].strip()
         if 'author' in head_info.keys():
-            self.author = head_info['author']
+            self.author = head_info['author'].strip()
         if 'create_time' in head_info.keys():
-            self.create_time = head_info['create_time']
+            self.create_time = head_info['create_time'].strip()
         if 'modify_time' in head_info.keys():
-            self.modify_time = head_info['modify_time']
+            self.modify_time = head_info['modify_time'].strip()
         return head_info
 
     def _read_ipynb(self, insert_mark=True, fill_mark=True):
