@@ -76,7 +76,7 @@ class PageDetail:
         if self.page_uid is not None:
             head_info['uid'] = self.page_uid.replace('-', '').strip()
 
-        return '\n'.join(['- {}: {}'.format(k, v) for k, v.strip() in head_info.items()])
+        return '\n'.join(['- {}: {}'.format(k, v.strip()) for k, v in head_info.items()])
 
     def _head_info_parse(self, info: str = None):
         head_info = {}
