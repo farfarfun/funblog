@@ -98,14 +98,13 @@ class BlogManage:
 
     def publish_page(self, blog: PublishBase, key='page_typecho_id'):
         for page in tqdm(self.page_db.select_all()):
+            _page = PageDetail(**page)
             if page[key] <= 0:
-                _page = PageDetail(**page)
                 page_id = blog.new_page(_page)
                 page[key] = page_id
                 self.page_db.update(
                     page, condition={'page_id': page['page_id']})
             else:
-                _page = PageDetail(**page)
                 blog.edit_page(page_id=page[key], page=_page)
 
     def publish_typecho(self, rpc_url: str, username: str, password: str):
