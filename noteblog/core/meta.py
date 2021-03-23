@@ -74,7 +74,7 @@ class PageDetail:
         if self.tags is not None:
             head_info['tags'] = ','.join(self.tags)
         if self.page_uid is not None:
-            head_info['uid'] = self.page_uid
+            head_info['uid'] = self.page_uid.replace('-', '')
 
         return '\n'.join(['- {}: {}'.format(k, v) for k, v in head_info.items()])
 
@@ -92,7 +92,7 @@ class PageDetail:
                     key, value = line[:i], line[i + 1:]
                     head_info[key] = value
         if 'uid' in head_info.keys():
-            self.page_uid = head_info['uid']
+            self.page_uid = head_info['uid'].replace('-', '')
         if 'title' in head_info.keys():
             self.title = head_info['title']
         if 'tags' in head_info.keys():
@@ -144,7 +144,7 @@ class PageDetail:
         filename, filetype = os.path.splitext(os.path.basename(self.path))
 
         self.title = self.name_convent(filename)
-        self.page_uid = str(uuid.uuid1())
+        self.page_uid = str(uuid.uuid1()).replace('-', '')
 
         if filetype == '.ipynb':
             content = self._read_ipynb()

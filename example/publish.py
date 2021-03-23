@@ -2,6 +2,7 @@ from noteblog.publish.core import BlogManage
 from notetool.tool.secret import read_secret
 
 # pip install  git+https://gitee.com/notechats/noteblog.git
+# pip install  git+https://gitee.com/notechats/notetool.git
 
 blog = BlogManage('/root/workspace/content/publish',
                   db_path='/root/workspace/content/blog.db')
