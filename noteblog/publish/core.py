@@ -106,7 +106,7 @@ class BlogManage:
                     page, condition={'page_id': page['page_id']})
             else:
                 _page = PageDetail(**page)
-                blog.edit_page(page_id=_page[key], page=_page)
+                blog.edit_page(page_id=page[key], page=_page)
 
     def publish_typecho(self, rpc_url: str, username: str, password: str):
         typecho = Typecho(rpc_url=rpc_url, username=username,
