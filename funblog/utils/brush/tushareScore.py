@@ -2,7 +2,7 @@ import random
 import re
 from time import sleep
 
-from noteblog.brush.EmailClient import EmailClient
+from funblog.brush.EmailClient import EmailClient
 from splinter.browser import Browser
 from tqdm import trange
 

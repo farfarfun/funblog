@@ -1,11 +1,11 @@
 # coding=utf-8
 import os
 
-from noteblog.blog.typecho import Typecho
-from noteblog.core.base import PublishBase
-from noteblog.core.meta import (BlogCategoryDB, BlogPageDB, CateDetail,
+from funblog.blog.typecho import Typecho
+from funblog.core.base import PublishBase
+from funblog.core.meta import (BlogCategoryDB, BlogPageDB, CateDetail,
                                 FileTree, PageDetail)
-from noteblog.publish.typecho import TypechoPB
+from funblog.publish.typecho import TypechoPB
 from tqdm import tqdm
 
 

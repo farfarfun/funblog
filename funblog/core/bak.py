@@ -7,9 +7,9 @@ from time import sleep
 import nbformat
 import yaml
 from nbconvert import MarkdownExporter
-from noteblog.common.base import (BlogCategoryDB, BlogPageDB, FileTree,
+from funblog.common.base import (BlogCategoryDB, BlogPageDB, FileTree,
                                   PageDetail)
-from noteblog.typecho.core import Category, Post, Typecho
+from funblog.typecho.core import Category, Post, Typecho
 
 
 class PostAll:
