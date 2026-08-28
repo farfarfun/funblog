@@ -1,5 +1,5 @@
 from funblog.publish.core import BlogManage
-from notetool.tool.secret import read_secret
+from funtool.tool.secret import read_secret
 
 # pip install  git+https://gitee.com/notechats/noteblog.git
 # pip install  git+https://gitee.com/notechats/notetool.git

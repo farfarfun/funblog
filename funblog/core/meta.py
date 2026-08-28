@@ -6,7 +6,7 @@ from typing import List
 
 import nbformat
 from nbconvert import MarkdownExporter
-from notedata.tables import SqliteTable
+from fundata.tables import SqliteTable
 
 
 class CateDetail:
