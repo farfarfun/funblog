@@ -1,8 +1,8 @@
 from funblog.publish.core import BlogManage
-from funtool.tool.secret import read_secret
+from funtool import read_secret
 
-# pip install  git+https://gitee.com/notechats/noteblog.git
-# pip install  git+https://gitee.com/notechats/notetool.git
+# pip install  git+https://github.com/farfarfun/funblog.git
+# pip install  farfuntool
 
 blog = BlogManage('/root/workspace/content/publish',
                   db_path='/root/workspace/content/blog.db')

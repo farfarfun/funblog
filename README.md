@@ -14,7 +14,7 @@ cd funblog
 pip install -e .
 ```
 
-依赖 `notebuild`、`notedata`（提供 `SqliteTable` 等基础能力），以及 `nbformat`、`nbconvert`（用于解析 `.ipynb`）。
+依赖 `funbuild`、`fundata`（提供 `SqliteTable` 等基础能力），以及 `nbformat`、`nbconvert`（用于解析 `.ipynb`）。
 
 ## 用法示例
 
