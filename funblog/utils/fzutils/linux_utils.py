@@ -2,9 +2,10 @@
 
 import sys
 import os
-import subprocess
 import socket
 from platform import system as platform_system
+
+from funshell import run_shell
 
 from .common_utils import (
     delete_list_null_str,
@@ -120,7 +121,7 @@ def get_str_from_command(cmd):
     :param cmd:
     :return:
     '''
-    return subprocess.getstatusoutput(cmd)[1]
+    return run_shell(cmd, printf=False)
 
 def get_current_file_path():
     '''

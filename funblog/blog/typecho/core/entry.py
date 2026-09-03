@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import BinaryIO, List
+from typing import BinaryIO
 
 
 class Meta:
@@ -56,7 +56,7 @@ class Content:
 
 
 class Post(Content):
-    def __init__(self, post_type: str = 'post', categories: List[str] = field(default_factory=list), *args, **kwargs):
+    def __init__(self, post_type: str = 'post', categories: list[str] = field(default_factory=list), *args, **kwargs):
         self.post_type = post_type
         self.categories = categories
         super(Post, self).__init__(*args, **kwargs)

@@ -14,7 +14,7 @@ cd funblog
 pip install -e .
 ```
 
-依赖 `funbuild`、`fundata`（提供 `SqliteTable` 等基础能力），以及 `nbformat`、`nbconvert`（用于解析 `.ipynb`）。
+运行时依赖 `fundata`（提供 `SqliteTable` 等基础能力）、`nbformat`、`nbconvert`（用于解析 `.ipynb`），均已写入 `pyproject.toml`。`funbuild` 只是发布本包时用到的构建工具，不是运行时依赖，无需单独安装即可使用本包。
 
 ## 用法示例
 
@@ -51,3 +51,16 @@ print(typecho.get_categories())
 
 - Yuque（语雀）发布模块（`funblog/blog/yuque/`）目前是空文件，功能未实现。
 - `funblog/utils/` 下的 `fzutils`、`brush` 是历史爬虫/工具脚本合集，与博客发布主流程无关，未做维护，使用前请自行确认可用性。
+
+---
+
+## 关于 farfarfun
+
+[farfarfun](https://github.com/farfarfun) 是一个专注于实用工具库的开源组织，
+涵盖云存储、数据处理、AI、多媒体与开发工具链等方向。
+
+- 🏠 组织主页：<https://github.com/farfarfun>
+- 📦 PyPI：<https://pypi.org/user/niuliangtao/>
+- 📧 联系：farfarfun@qq.com
+
+本项目基于 [MIT](LICENSE) 协议开源。

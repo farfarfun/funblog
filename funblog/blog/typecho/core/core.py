@@ -1,5 +1,4 @@
 from dataclasses import asdict
-from typing import Dict, List, Optional
 from xmlrpc.client import Fault, ServerProxy
 
 from .entry import Attachment, Category, Comment, Page, Post
@@ -39,22 +38,25 @@ class TypechoBase:
 
     def _try_rpc(self, rpc_method, *args, **kw):
         """
+        执行一次 XML-RPC 调用，捕获调用异常并记录带上下文的错误日志。
 
-        :param rpc_method:
-        :param args:
-        :param kw:
-        :return:
+        :param rpc_method: 要调用的 XML-RPC 方法（如 `self.server.metaWeblog.getPost`）
+        :param args: 透传给 `rpc_method` 的位置参数
+        :param kw: 透传给 `rpc_method` 的关键字参数
+        :return: RPC 调用结果；调用失败时返回 None
         """
         res = None
+        method_name = getattr(rpc_method, "_ServerProxy__name", rpc_method)
         try:
             res = rpc_method(*args, **kw)
             logger.info(res)
             if res == '':
                 res = None
         except Fault as e:
-            logger.error("Error {}: {}".format(e.faultCode, e.faultString))
+            logger.error("Typecho RPC 调用失败，方法：{}，错误码 {}：{}".format(
+                method_name, e.faultCode, e.faultString))
         except Exception as e:
-            logger.error("Error {}".format(e))
+            logger.error("Typecho RPC 调用异常，方法：{}，原因：{}".format(method_name, e))
         return res
 
 
@@ -63,19 +65,19 @@ class TypechoPostMixin(TypechoBase):
     TypechoPostMixin
     """
 
-    def get_posts(self, num: int = 10) -> Optional[List[Dict]]:
+    def get_posts(self, num: int = 10) -> list[dict] | None:
         """
         get_posts
         """
         return self.try_rpc(self.server.metaWeblog.getRecentPosts, num)
 
-    def get_post(self, post_id: int) -> Optional[Dict]:
+    def get_post(self, post_id: int) -> dict | None:
         """
         get_post
         """
         return self.try_rpc(self.server.metaWeblog.getPost, post_id)
 
-    def new_post(self, post: Post, publish: bool) -> Optional[str]:
+    def new_post(self, post: Post, publish: bool) -> str | None:
         """
         Post's status will cover publish, and if you only save post, the post id will only be '0'
         If Post's categories are not created, it will only create the first category
@@ -84,7 +86,7 @@ class TypechoPostMixin(TypechoBase):
             post.categories) == 0 else post.categories
         return self.try_rpc(self.server.metaWeblog.newPost, post, publish)
 
-    def edit_post(self, post: Post, post_id: int, publish: bool) -> Optional[str]:
+    def edit_post(self, post: Post, post_id: int, publish: bool) -> str | None:
         """
         edit_post
         """
@@ -108,14 +110,14 @@ class TypechoPageMixin(TypechoBase):
         """
         super(TypechoPageMixin, self).__init__(*args, **kwargs)
 
-    def get_pages(self) -> Optional[List[Dict]]:
+    def get_pages(self) -> list[dict] | None:
         """
 
         :return:
         """
         return self.try_rpc(self.server.wp.getPages)
 
-    def get_page(self, page_id: int) -> Optional[Dict]:
+    def get_page(self, page_id: int) -> dict | None:
         """
 
         :param page_id:
@@ -123,7 +125,7 @@ class TypechoPageMixin(TypechoBase):
         """
         return self._try_rpc(self.server.wp.getPage, self.blog_id, page_id, self.username, self.password)
 
-    def new_page(self, page: Page, publish: bool) -> Optional[str]:
+    def new_page(self, page: Page, publish: bool) -> str | None:
         """
 
         :param page:
@@ -132,7 +134,7 @@ class TypechoPageMixin(TypechoBase):
         """
         return self.try_rpc(self.server.metaWeblog.newPost, page, publish)
 
-    def edit_page(self, page: Page, page_id: int, publish: bool) -> Optional[str]:
+    def edit_page(self, page: Page, page_id: int, publish: bool) -> str | None:
         """
 
         :param page: 
@@ -144,7 +146,7 @@ class TypechoPageMixin(TypechoBase):
         d.update({'postId': page_id})
         return self.try_rpc(self.server.metaWeblog.newPost, d, publish)
 
-    def del_page(self, page_id: int) -> Optional[bool]:
+    def del_page(self, page_id: int) -> bool | None:
         """
 
         :param page_id: 
@@ -158,14 +160,14 @@ class TypechoCategoryMixin(TypechoBase):
     TypechoCategoryMixin
     """
 
-    def get_categories(self) -> Optional[Dict]:
+    def get_categories(self) -> dict | None:
         """
 
         :return:
         """
         return self.try_rpc(self.server.metaWeblog.getCategories)
 
-    def new_category(self, category: Category, parent_id: int = 0, new_cate=False) -> Optional[str]:
+    def new_category(self, category: Category, parent_id: int = 0, new_cate=False) -> str | None:
         """
 
         :param category:
@@ -182,7 +184,7 @@ class TypechoCategoryMixin(TypechoBase):
             else:
                 return self.try_rpc(self.server.wp.newCategory, category)
 
-    def del_category(self, category_id: int) -> Optional[bool]:
+    def del_category(self, category_id: int) -> bool | None:
         """
 
         :param category_id:
@@ -196,7 +198,7 @@ class TypechoTagMixin(TypechoBase):
     TypechoTagMixin
     """
 
-    def get_tags(self) -> Optional[List[Dict]]:
+    def get_tags(self) -> list[dict] | None:
         """
 
         :return:
@@ -210,7 +212,7 @@ class TypechoAttachmentMixin(TypechoBase):
     """
 
     def get_attachments(self, post_id: int = None, mime_type: str = None, page_size: int = None,
-                        page_num: int = None) -> Optional[List[Dict]]:
+                        page_num: int = None) -> list[dict] | None:
         """
 
         :param post_id:
@@ -230,7 +232,7 @@ class TypechoAttachmentMixin(TypechoBase):
             struct.update({'offset': page_num})
         return self.try_rpc(self.server.wp.getMediaLibrary, struct)
 
-    def get_attachment(self, attachment_id) -> Optional[Dict]:
+    def get_attachment(self, attachment_id) -> dict | None:
         """
 
         :param attachment_id:
@@ -253,7 +255,7 @@ class TypechoCommentMixin(TypechoBase):
     """
 
     def get_comments(self, status: str = None, post_id: int = None, page_size: int = None,
-                     page_num: int = None) -> Optional[List[Dict]]:
+                     page_num: int = None) -> list[dict] | None:
         """
 
         :param status:
@@ -273,7 +275,7 @@ class TypechoCommentMixin(TypechoBase):
             struct.update({'offset': page_num})
         return self.try_rpc(self.server.wp.getComments, struct)
 
-    def get_comment(self, comment_id: int) -> Optional[Dict]:
+    def get_comment(self, comment_id: int) -> dict | None:
         """
 
         :param comment_id:
@@ -295,7 +297,7 @@ class TypechoCommentMixin(TypechoBase):
         path = post_id
         return self.try_rpc(self.server.wp.newComment, path, d)
 
-    def edit_comment(self, comment: Comment, comment_id: int) -> Optional[bool]:
+    def edit_comment(self, comment: Comment, comment_id: int) -> bool | None:
         """
 
         :param comment:
@@ -304,7 +306,7 @@ class TypechoCommentMixin(TypechoBase):
         """
         return self.try_rpc(self.server.wp.editComment, comment_id, comment)
 
-    def del_comment(self, comment_id: int) -> Optional[bool]:
+    def del_comment(self, comment_id: int) -> bool | None:
         """
 
         :param comment_id:

@@ -72,7 +72,7 @@ def decrypt(key, tmp_str):
         b[i]= b1
     try:
         return b.decode("gbk")
-    except:
+    except UnicodeDecodeError:
         return ''
 
 def md5_encrypt(target_str, encoding='utf-8'):

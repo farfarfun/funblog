@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, BinaryIO
+from typing import BinaryIO
 
 
 @dataclass
@@ -48,7 +48,7 @@ class Content:
 @dataclass
 class Post(Content):
     post_type: str = 'post'
-    categories: List[str] = field(default_factory=list)
+    categories: list[str] = field(default_factory=list)
 
 
 @dataclass

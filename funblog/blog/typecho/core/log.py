@@ -1,7 +1,3 @@
-from logging import getLogger, StreamHandler, Formatter
+from farlog import getLogger
 
-fmt = Formatter('%(levelname)s: [%(asctime)s: %(message)s')
-sh = StreamHandler()
-sh.setFormatter(fmt)
-logger = getLogger()
-logger.addHandler(sh)
+logger = getLogger("funblog.typecho")

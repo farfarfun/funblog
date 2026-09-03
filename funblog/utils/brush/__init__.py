@@ -6,5 +6,5 @@
 # @File    : __init__.py.py
 # @Software: PyCharm
 
-# from .EmailClient import EmailClient, EmailDataObject
-# from .TempEmail import TempEmail
+# from .email_client import EmailClient, EmailDataObject
+# from .temp_email import TempEmail

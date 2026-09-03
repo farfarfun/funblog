@@ -15,8 +15,12 @@ import requests
 from io import BytesIO
 from base64 import b64encode
 
+from farlog import getLogger
+
 from .path_utils import from_file_path_get_file_extension_name
 # from fzutils.path_utils import from_file_path_get_file_extension_name
+
+logger = getLogger("funblog.fzutils")
 
 __all__ = [
     'save_img_through_url',             # 根据img_url保存图片
@@ -42,7 +46,7 @@ def save_img_through_url(img_url, save_path) -> bool:
         img.save(save_path)
         res = True
     except Exception as e:
-        print(e)
+        logger.error("下载并保存图片失败，img_url={}，save_path={}，原因：{}".format(img_url, save_path, e))
 
     return res
 
@@ -87,7 +91,8 @@ def specified_position_screenshot(ori_img_path, target_img_save_path, left, top,
         target_img.save(target_img_save_path)
         res = True
     except Exception as e:
-        print(e)
+        logger.error("截图失败，ori_img_path={}，target_img_save_path={}，原因：{}".format(
+            ori_img_path, target_img_save_path, e))
 
     return res
 

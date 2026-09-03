@@ -13,9 +13,12 @@ celery常用函数
 from time import time
 from celery import Celery
 from celery.utils.log import get_task_logger
+from farlog import getLogger
 
 from .common_utils import _print
 from .time_utils import fz_set_timeout
+
+logger = getLogger("funblog.fzutils")
 
 __all__ = [
     'init_celery_app',                              # 初始化一个celery对象
@@ -99,19 +102,19 @@ def block_get_celery_async_results(tasks:list, r_timeout=2.5, func_timeout=30 * 
                     if r.ready():
                         try:
                             all.append(r.get(timeout=r_timeout, propagate=False))
-                            print('\r--->>> success_num: {}'.format(success_num), end='', flush=True)
+                            logger.info('celery 任务处理进度，success_num={}'.format(success_num))
                         except TimeoutError:
                             pass
                         success_num += 1
                         try:
                             tasks.pop(r_index)
-                        except:
+                        except IndexError:
                             pass
                     else:
                         pass
                 except Exception as e:
                     # redis.exceptions.TimeoutError: Timeout reading from socket
-                    print(e)
+                    logger.error("获取 celery 任务结果失败，r_index={}，原因：{}".format(r_index, e))
                     return []
         else:
             pass
@@ -122,11 +125,11 @@ def block_get_celery_async_results(tasks:list, r_timeout=2.5, func_timeout=30 * 
     try:
         all = get_res(tasks=tasks)
     except Exception as e:
-        print(e)
+        logger.error("block_get_celery_async_results 执行失败，tasks 数量={}，原因：{}".format(len(tasks), e))
         return []
 
     time_consume = time() - s_time
-    print('\n执行完毕! 此次耗时 {} s!'.format(round(float(time_consume), 3)))
+    logger.info('celery 任务执行完毕，耗时 {} s'.format(round(float(time_consume), 3)))
 
     return all
 
