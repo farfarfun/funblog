@@ -1,14 +1,16 @@
+from funsecret import read_secret
+
 from funblog.publish.core import BlogManage
-from funtool import read_secret
 
 # pip install  git+https://github.com/farfarfun/funblog.git
-# pip install  farfuntool
+# pip install funsecret
 
-blog = BlogManage('/root/workspace/content/publish',
-                  db_path='/root/workspace/content/blog.db')
+blog = BlogManage(
+    "/root/workspace/content/publish", db_path="/root/workspace/content/blog.db"
+)
 
-rpc_url = read_secret(cate1='blog', cate2='typecho', cate3='rpc_url')
-username = read_secret(cate1='blog', cate2='typecho', cate3='username')
-password = read_secret(cate1='blog', cate2='typecho', cate3='password')
+rpc_url = read_secret(cate1="blog", cate2="typecho", cate3="rpc_url")
+username = read_secret(cate1="blog", cate2="typecho", cate3="username")
+password = read_secret(cate1="blog", cate2="typecho", cate3="password")
 blog.local_scan()
 blog.publish_typecho(rpc_url=rpc_url, username=username, password=password)

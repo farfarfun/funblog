@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # @Time    : 2019/04/29 16:31
 # @Author  : niuliangtao
-# @Site    : 
+# @Site    :
 # @File    : pyblog.py
 # @Software: PyCharm
 
@@ -10,14 +9,13 @@
 
 import os
 import urllib.request
-
-from xmlrpc.client import Fault, ServerProxy, Binary
+from xmlrpc.client import Binary, Fault, ServerProxy
 
 
 def checkURL(url):
     try:
         urllib.request.urlopen(url)
-    except IOError:
+    except OSError:
         return 0
     return 1
 
@@ -26,23 +24,26 @@ class BlogError(Exception):
     """
     Base class for Blog errors
     """
-    METHOD_NOT_SUPPORTED = 'Method not (yet) supported'
+
+    METHOD_NOT_SUPPORTED = "Method not (yet) supported"
 
     def __init__(self, msg):
         self.msg = msg
 
     def __repr__(self):
-        return self.msg
+        return str(self.msg)
 
     __str__ = __repr__
 
 
-class Blog(object):
+class Blog:
     """
     Base class for all blog objects.
     """
 
-    def __init__(self, serverapi, username, password, default_blog_id=None, app_key='0x001'):
+    def __init__(
+        self, serverapi, username, password, default_blog_id=None, app_key="0x001"
+    ):
         """
         Args:
             serverapi = URL to the XML-RPC API.
@@ -58,11 +59,14 @@ class Blog(object):
 
         # Check if URL exists
         if not checkURL(serverapi):
-            raise BlogError('XML-RPC API URL not found.')
+            raise BlogError("XML-RPC API URL not found.")
 
         # Connect to the api. Call listMethods to keep a dictionary of available methods
         self.server = ServerProxy(serverapi)
         self.list_methods()
+
+    def __repr__(self):
+        return f"{type(self).__name__}(serverapi={self.server!r}, username={self.username!r})"
 
     def list_methods(self):
         """Call system.listMethods on server.
@@ -79,7 +83,6 @@ class Blog(object):
         return self.methods.sort()
 
     def execute(self, method_name, *args):
-
         """
         Callback function to call the XML-RPC method
 
@@ -111,7 +114,7 @@ class MetaWeblog(Blog):
     This class extends Blog to implement metaWeblog API
     """
 
-    def __init__(self, serverapi, username, password, default_blog_id, app_key='0x001'):
+    def __init__(self, serverapi, username, password, default_blog_id, app_key="0x001"):
         Blog.__init__(self, serverapi, username, password, app_key, default_blog_id)
 
     def get_recent_posts(self, num_posts=10, blog_id=None):
@@ -126,7 +129,13 @@ class MetaWeblog(Blog):
             if self.default_blog_id is None:
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
-        return self.execute('metaWeblog.getRecentPosts', blog_id, self.username, self.password, num_posts)
+        return self.execute(
+            "metaWeblog.getRecentPosts",
+            blog_id,
+            self.username,
+            self.password,
+            num_posts,
+        )
 
     def get_post(self, post_id):
         """
@@ -135,7 +144,7 @@ class MetaWeblog(Blog):
         Args:
             post_id = Unique identifier for the post
         """
-        return self.execute('metaWeblog.getPost', post_id, self.username, self.password)
+        return self.execute("metaWeblog.getPost", post_id, self.username, self.password)
 
     def new_post(self, content, publish=False, blog_id=None):
         """
@@ -151,7 +160,14 @@ class MetaWeblog(Blog):
             if self.default_blog_id is None:
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
-        return self.execute('metaWeblog.newPost', blog_id, self.username, self.password, content, publish)
+        return self.execute(
+            "metaWeblog.newPost",
+            blog_id,
+            self.username,
+            self.password,
+            content,
+            publish,
+        )
 
     def edit_post(self, post_id, new_post, publish=True):
         """
@@ -162,7 +178,14 @@ class MetaWeblog(Blog):
             new_post (dict): dictionary with content details about the new post.
             publish (bool): Publish status.
         """
-        return self.execute('metaWeblog.editPost', post_id, self.username, self.password, new_post, publish)
+        return self.execute(
+            "metaWeblog.editPost",
+            post_id,
+            self.username,
+            self.password,
+            new_post,
+            publish,
+        )
 
     def delete_post(self, post_id, publish=True):
         """
@@ -173,7 +196,14 @@ class MetaWeblog(Blog):
             publish = Publish status.
 
         """
-        return self.execute('metaWeblog.deletePost', self.app_key, post_id, self.username, self.password, publish)
+        return self.execute(
+            "metaWeblog.deletePost",
+            self.app_key,
+            post_id,
+            self.username,
+            self.password,
+            publish,
+        )
 
     def get_categories(self, blog_id=None):
         """
@@ -187,14 +217,18 @@ class MetaWeblog(Blog):
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
 
-        return self.execute('metaWeblog.getCategories', blog_id, self.username, self.password)
+        return self.execute(
+            "metaWeblog.getCategories", blog_id, self.username, self.password
+        )
 
     def get_users_blogs(self):
         """
         Returns a list of blogs associated with the user.
 
         """
-        return self.execute('metaWeblog.getUsersBlogs', self.app_key, self.username, self.password)
+        return self.execute(
+            "metaWeblog.getUsersBlogs", self.app_key, self.username, self.password
+        )
 
     def new_media_object(self, new_object, name=None, blog_id=None):
         """
@@ -224,22 +258,28 @@ class MetaWeblog(Blog):
                         media_name = name
                     else:
                         media_name = os.path.basename(new_object)
-                    new_object = {'bits': media_bits, 'name': media_name}
+                    new_object = {"bits": media_bits, "name": media_name}
             except ValueError:
                 pass
         # See if the new_object implements file methods
-        elif type(getattr(new_object, 'read', None)).__name__ == 'function':
+        elif type(getattr(new_object, "read", None)).__name__ == "function":
             media_bits = Binary(new_object.read())
             if name is not None:
                 media_name = name
             else:
                 media_name = os.path.basename(new_object.name)
-            new_object = {'bits': media_bits, 'name': media_name}
+            new_object = {"bits": media_bits, "name": media_name}
         elif isinstance(new_object, dict):
             if name is not None:
-                new_object['name'] = name
+                new_object["name"] = name
 
-        return self.execute('metaWeblog.newMediaObject', blog_id, self.username, self.password, new_object)
+        return self.execute(
+            "metaWeblog.newMediaObject",
+            blog_id,
+            self.username,
+            self.password,
+            new_object,
+        )
 
     def get_template(self, template_type, blog_id=None):
         """
@@ -250,8 +290,14 @@ class MetaWeblog(Blog):
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
 
-        return self.execute("metaWeblog.getTemplate", self.app_key, blog_id, self.username, self.password,
-                            template_type)
+        return self.execute(
+            "metaWeblog.getTemplate",
+            self.app_key,
+            blog_id,
+            self.username,
+            self.password,
+            template_type,
+        )
 
     def set_template(self, template, template_type, blog_id=None):
         """
@@ -262,8 +308,15 @@ class MetaWeblog(Blog):
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
 
-        return self.execute("metaWeblog.setTemplate", self.app_key, blog_id, self.username, self.password, template,
-                            template_type)
+        return self.execute(
+            "metaWeblog.setTemplate",
+            self.app_key,
+            blog_id,
+            self.username,
+            self.password,
+            template,
+            template_type,
+        )
 
 
 class WordPress(MetaWeblog):
@@ -275,7 +328,9 @@ class WordPress(MetaWeblog):
     default_blog_id = 1
 
     def __init__(self, serverapi, username, password, default_blog_id=1):
-        MetaWeblog.__init__(self, serverapi, username, password, default_blog_id=default_blog_id)
+        MetaWeblog.__init__(
+            self, serverapi, username, password, default_blog_id=default_blog_id
+        )
 
     def get_post_status_list(self, blog_id=None):
         """
@@ -284,7 +339,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getPostStatusList', blog_id, self.username, self.password)
+        return self.execute(
+            "wp.getPostStatusList", blog_id, self.username, self.password
+        )
 
     def get_authors(self, blog_id=None):
         """
@@ -293,7 +350,7 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getAuthors', blog_id, self.username, self.password)
+        return self.execute("wp.getAuthors", blog_id, self.username, self.password)
 
     def new_page(self, content, publish=True, blog_id=None):
         """
@@ -303,7 +360,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.newPage', blog_id, self.username, self.password, content, publish)
+        return self.execute(
+            "wp.newPage", blog_id, self.username, self.password, content, publish
+        )
 
     def edit_page(self, page_id, content, publish=True, blog_id=None):
         """
@@ -318,7 +377,15 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.editPage', blog_id, page_id, self.username, self.password, content, publish)
+        return self.execute(
+            "wp.editPage",
+            blog_id,
+            page_id,
+            self.username,
+            self.password,
+            content,
+            publish,
+        )
 
     def delete_page(self, page_id, blog_id=None):
         """
@@ -330,7 +397,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.deletePage', blog_id, self.username, self.password, page_id)
+        return self.execute(
+            "wp.deletePage", blog_id, self.username, self.password, page_id
+        )
 
     def get_pages(self, blog_id=None):
         """
@@ -339,7 +408,7 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getPages', blog_id, self.username, self.password)
+        return self.execute("wp.getPages", blog_id, self.username, self.password)
 
     def get_page(self, page_id, blog_id=None):
         """
@@ -348,7 +417,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getPage', blog_id, page_id, self.username, self.password)
+        return self.execute(
+            "wp.getPage", blog_id, page_id, self.username, self.password
+        )
 
     def get_page_list(self, blog_id=None):
         """
@@ -357,7 +428,7 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getPageList', blog_id, self.username, self.password)
+        return self.execute("wp.getPageList", blog_id, self.username, self.password)
 
     def get_page_status_list(self, blog_id=None):
         """
@@ -367,7 +438,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getPageStatusList', blog_id, self.username, self.password)
+        return self.execute(
+            "wp.getPageStatusList", blog_id, self.username, self.password
+        )
 
     def new_category(self, content, blog_id=None):
         """
@@ -381,7 +454,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.newCategory', blog_id, self.username, self.password, content)
+        return self.execute(
+            "wp.newCategory", blog_id, self.username, self.password, content
+        )
 
     def delete_category(self, cat_id, blog_id=None):
         """
@@ -393,7 +468,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.deleteCategory', blog_id, self.username, self.password, cat_id)
+        return self.execute(
+            "wp.deleteCategory", blog_id, self.username, self.password, cat_id
+        )
 
     def get_comment_count(self, post_id=0, blog_id=None):
         """
@@ -403,13 +480,15 @@ class WordPress(MetaWeblog):
         """
         if blog_id is None:
             blog_id = self.default_blog_id
-        return self.execute('wp.getCommentCount', blog_id, self.username, self.password, post_id)
+        return self.execute(
+            "wp.getCommentCount", blog_id, self.username, self.password, post_id
+        )
 
     def get_users_blogs(self):
         """
         Returns a list of blogs associated by the user.
         """
-        return self.execute('wp.getUsersBlogs', self.username, self.password)
+        return self.execute("wp.getUsersBlogs", self.username, self.password)
 
     def get_options(self, options=None, blog_id=None):
         """
@@ -423,7 +502,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.getOptions', blog_id, self.username, self.password, options)
+        return self.execute(
+            "wp.getOptions", blog_id, self.username, self.password, options
+        )
 
     def set_options(self, option, blog_id=None):
         """
@@ -434,7 +515,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.setOptions', blog_id, self.username, self.password, option)
+        return self.execute(
+            "wp.setOptions", blog_id, self.username, self.password, option
+        )
 
     def suggest_categories(self, category, max_results=10, blog_id=None):
         """
@@ -443,7 +526,14 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.suggestCategories', blog_id, self.username, self.password, category, max_results)
+        return self.execute(
+            "wp.suggestCategories",
+            blog_id,
+            self.username,
+            self.password,
+            category,
+            max_results,
+        )
 
     def upload_file(self, data, blog_id=None):
         """
@@ -454,7 +544,9 @@ class WordPress(MetaWeblog):
         if blog_id is None:
             blog_id = self.default_blog_id
 
-        return self.execute('wp.uploadFile', blog_id, self.username, self.password, data)
+        return self.execute(
+            "wp.uploadFile", blog_id, self.username, self.password, data
+        )
 
 
 class MovableType(MetaWeblog):
@@ -462,7 +554,7 @@ class MovableType(MetaWeblog):
     A Python interface to the MovableType API.
     """
 
-    app_key = '0x001'
+    app_key = "0x001"
     methods = []
 
     mt_fields = [
@@ -491,7 +583,7 @@ class MovableType(MetaWeblog):
 
         # Check if URL exists
         if not checkURL(serverapi):
-            raise BlogError('XML-RPC API URL not found.')
+            raise BlogError("XML-RPC API URL not found.")
 
         # Connect to the api. Call mt.supportedMethods to keep a dictionary of available methods
         self.server = ServerProxy(serverapi)
@@ -520,7 +612,8 @@ class MovableType(MetaWeblog):
     def _parse_custom_fields(self, content):
         if not isinstance(content, dict):
             raise BlogError(
-                "Invalid type for field 'content': excepted dict, got %s" % type(content).__name_
+                "Invalid type for field 'content': excepted dict, got %s"
+                % type(content).__name_
             )
 
         custom_fields = []
@@ -532,11 +625,11 @@ class MovableType(MetaWeblog):
 
         # This is the format that CustomFields::XMLRPCServer uses to encode custom fields
         if len(custom_fields) > 0:
-            if 'mt_text_more' not in content:
-                content['mt_text_more'] = u''
-            elif not isinstance(content['mt_text_more'], str):
-                content['mt_text_more'] = u''
-            content['mt_text_more'] += u"\n" + u"\n".join(custom_fields)
+            if "mt_text_more" not in content or not isinstance(
+                content["mt_text_more"], str
+            ):
+                content["mt_text_more"] = ""
+            content["mt_text_more"] += "\n" + "\n".join(custom_fields)
 
         return content
 
@@ -564,7 +657,7 @@ class MovableType(MetaWeblog):
             username = self.username
             password = self.password
 
-        return self.execute('blogger.getUserInfo', self.app_key, username, password)
+        return self.execute("blogger.getUserInfo", self.app_key, username, password)
 
     def get_category_list(self, blog_id=None):
         """
@@ -581,7 +674,7 @@ class MovableType(MetaWeblog):
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
 
-        return self.execute('mt.getCategoryList', blog_id, self.username, self.password)
+        return self.execute("mt.getCategoryList", blog_id, self.username, self.password)
 
     def set_post_categories(self, post_id, categories):
         """
@@ -593,7 +686,9 @@ class MovableType(MetaWeblog):
                 categoryId (int): The ID of the category
                 isPrimary (bool): Whether this is the primary category; optional
         """
-        return self.execute('mt.setPostCategories', post_id, self.username, self.password, categories)
+        return self.execute(
+            "mt.setPostCategories", post_id, self.username, self.password, categories
+        )
 
     def get_post_categories(self, post_id):
         """
@@ -604,7 +699,9 @@ class MovableType(MetaWeblog):
             list. an array of dicts containing categoryName (string), categoryId (string),
                   and isPrimary (boolean).
         """
-        return self.execute('mt.getPostCategories', post_id, self.username, self.password)
+        return self.execute(
+            "mt.getPostCategories", post_id, self.username, self.password
+        )
 
     def get_recent_post_titles(self, blog_id=None):
         """
@@ -620,7 +717,9 @@ class MovableType(MetaWeblog):
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
 
-        return self.execute('mt.getRecentPostTitles', blog_id, self.username, self.password)
+        return self.execute(
+            "mt.getRecentPostTitles", blog_id, self.username, self.password
+        )
 
     def publish_post(self, post_id):
         """
@@ -633,7 +732,7 @@ class MovableType(MetaWeblog):
         Returns:
             boolean. True on success, fault on failure
         """
-        return self.execute('mt.publishPost', post_id, self.username, self.password)
+        return self.execute("mt.publishPost", post_id, self.username, self.password)
 
     def edit_post(self, post_id, content, publish):
         """
@@ -658,10 +757,17 @@ class MovableType(MetaWeblog):
                 :param publish:
         """
         content = self._parse_custom_fields(content)
-        if 'publish' not in content:
-            content['publish'] = publish
+        if "publish" not in content:
+            content["publish"] = publish
 
-        return self.execute('metaWeblog.editPost', post_id, self.username, self.password, content, publish)
+        return self.execute(
+            "metaWeblog.editPost",
+            post_id,
+            self.username,
+            self.password,
+            content,
+            publish,
+        )
 
     def get_recent_posts(self, num_posts=10, blog_id=None):
         """
@@ -692,7 +798,13 @@ class MovableType(MetaWeblog):
                 raise BlogError("No blog_id passed")
             blog_id = self.default_blog_id
 
-        return self.execute('metaWeblog.getRecentPosts', blog_id, self.username, self.password, num_posts)
+        return self.execute(
+            "metaWeblog.getRecentPosts",
+            blog_id,
+            self.username,
+            self.password,
+            num_posts,
+        )
 
     def new_post(self, content, publish=False, blog_id=None):
         """
@@ -725,17 +837,22 @@ class MovableType(MetaWeblog):
             blog_id = self.default_blog_id
 
         content = self._parse_custom_fields(content)
-        if 'publish' not in content and publish == False:
-            content['publish'] = False
+        if "publish" not in content and publish == False:
+            content["publish"] = False
 
-        return self.execute('metaWeblog.newPost', blog_id, self.username, self.password, content, publish)
+        return self.execute(
+            "metaWeblog.newPost",
+            blog_id,
+            self.username,
+            self.password,
+            content,
+            publish,
+        )
 
 
 def main():
     url = "https://my.oschina.net/action/xmlrpc"
 
-    pass
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

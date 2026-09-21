@@ -4,6 +4,10 @@
 
 ## [0.5.8]（当前版本）
 
+### 新增
+
+- 无。
+
 ### 变更
 
 - 破坏性变更：源码包名 / import 路径 / PyPI 发布名从 `noteblog` 改为 `funblog`，与 GitHub 仓库名保持一致（此前已完成 `noteblog` → `funblog` 的仓库改名）。
@@ -17,3 +21,7 @@
 ### 修复
 
 - 修复日志（改用 `farlog`，去掉导入期副作用）、异常处理（`raise Exception` 改为领域相关的 `NotImplementedError`）、`print` 诊断输出、旧式 `typing.Optional/List/Dict` 标注等代码规范问题；删除与线上代码完全重复且未被引用的 `funblog/blog/typecho/core/` 死代码目录（详见 farfarfun/todo-list#360）。
+
+### 废弃
+
+- 无。
