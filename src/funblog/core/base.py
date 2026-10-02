@@ -4,7 +4,7 @@ from .meta import CateDetail as Cate
 from .meta import PageDetail as Page
 
 
-class PublishBase(object):
+class PublishBase:
     """
     发布渠道的抽象基类。
 
@@ -12,7 +12,7 @@ class PublishBase(object):
     未实现的方法调用时会抛出 ``NotImplementedError``。
     """
 
-    def __init__(self, name='default', *args, **kwargs):
+    def __init__(self, name="default", *args, **kwargs):
         """
         :param name: 发布渠道名称，用于区分不同的发布目标
         """

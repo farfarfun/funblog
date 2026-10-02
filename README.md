@@ -2,11 +2,13 @@
 
 本地笔记发布工具：把本地目录下的 Markdown / Jupyter Notebook（`.md` / `.ipynb`）文件按目录结构扫描成「分类-文章」树，记录到本地 SQLite，再通过 XML-RPC（metaWeblog 协议）批量发布/更新到 [Typecho](https://typecho.org/) 博客。仓库里还带了一个尚未实现的 Yuque（语雀）发布模块的空壳。
 
-PyPI 上目前没有发布 `funblog` 这个包，下面只给出源码安装方式。
-
 ## 安装
 
-PyPI 上没有可用的发布包，需要从源码安装：
+```bash
+pip install funblog
+```
+
+从源码安装（开发用）：
 
 ```bash
 git clone https://github.com/farfarfun/funblog.git
@@ -14,7 +16,7 @@ cd funblog
 pip install -e .
 ```
 
-运行时依赖 `fundata`（提供 `SqliteTable` 等基础能力）、`nbformat`、`nbconvert`（用于解析 `.ipynb`），均已写入 `pyproject.toml`。`funbuild` 只是发布本包时用到的构建工具，不是运行时依赖，无需单独安装即可使用本包。
+运行时依赖 `fundata`（提供 `SqliteTable` 等基础能力）、`nbformat`、`nbconvert`（用于解析 `.ipynb`）、`farlog`、`tqdm`，均已写入 `pyproject.toml`。`funbuild` 只是发布本包时用到的构建工具，不是运行时依赖，无需单独安装即可使用本包。
 
 ## 用法示例
 
@@ -22,16 +24,16 @@ pip install -e .
 from funblog.publish.core import BlogManage
 
 # path_root: 本地笔记根目录，子目录会被当作分类，.md/.ipynb 文件会被当作文章
-blog = BlogManage(path_root='/path/to/notes', db_path='/path/to/blog.db')
+blog = BlogManage(path_root="/path/to/notes", db_path="/path/to/blog.db")
 
 # 1. 扫描本地文件，写入分类表/文章表
 blog.local_scan()
 
 # 2. 发布到 Typecho（通过 XML-RPC）
 blog.publish_typecho(
-    rpc_url='https://your-blog.com/action/xmlrpc',
-    username='your-username',
-    password='your-password',
+    rpc_url="https://your-blog.com/action/xmlrpc",
+    username="your-username",
+    password="your-password",
 )
 ```
 
@@ -42,8 +44,11 @@ blog.publish_typecho(
 ```python
 from funblog.blog.typecho import Typecho
 
-typecho = Typecho(rpc_url='https://your-blog.com/action/xmlrpc',
-                  username='your-username', password='your-password')
+typecho = Typecho(
+    rpc_url="https://your-blog.com/action/xmlrpc",
+    username="your-username",
+    password="your-password",
+)
 print(typecho.get_categories())
 ```
 

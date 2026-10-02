@@ -1,12 +1,11 @@
-# coding=utf-8
 import os
 import string
 import uuid
 
 import nbformat
 from farlog import getLogger
-from nbconvert import MarkdownExporter
 from fundata.tables_bak import SqliteTable
+from nbconvert import MarkdownExporter
 
 logger = getLogger("funblog")
 
@@ -41,15 +40,15 @@ class PageDetail:
     def __init__(self, *args, **kwargs):
         self.page_id = 0
         self.page_uid = ""
-        self.title = ''
-        self.sub_title = ''
-        self.describe = ''
+        self.title = ""
+        self.sub_title = ""
+        self.describe = ""
         self.cate_id = 0
-        self.cate_name = ''
+        self.cate_name = ""
         self.page_typecho_id = 0
         self.page_yuque_id = 0
-        self.path = ''
-        self.tags = ''
+        self.path = ""
+        self.tags = ""
         self.modify_time = ""
         self.create_time = ""
 
@@ -63,68 +62,73 @@ class PageDetail:
         """导出实例属性为字典（不含自增主键 `page_id`），便于写入数据库。"""
         result = {}
         result.update(self.__dict__)
-        result.pop('page_id')
+        result.pop("page_id")
         return result
 
     def reads(self):
         """读取 `self.path` 指向的本地文件全文内容。"""
-        return open(self.path, 'r').read()
+        with open(self.path, "r") as f:
+            return f.read()
 
     def writes(self, s):
         """将内容整体写回 `self.path` 指向的本地文件（覆盖写）。"""
-        with open(self.path, 'w') as f:
+        with open(self.path, "w") as f:
             f.write(s)
 
     @staticmethod
     def name_convent(name: str) -> str:
         """去掉文件名前导的排序数字与分隔符，得到用作文章标题的干净名称。"""
-        return name.lstrip(string.digits).lstrip('|_-|.')
+        return name.lstrip(string.digits).lstrip("|_-.")
 
     def _head_info_str(self):
         """把标题/标签/uid 等字段序列化为写回文件头部的 Markdown 列表文本。"""
         head_info = {}
         if self.title is not None:
-            head_info['title'] = self.title.strip()
+            head_info["title"] = self.title.strip()
         if self.tags is not None:
-            head_info['tags'] = ','.join(self.tags)
+            # tags 既可能是从文件头部解析出来的 'a,b' 字符串，也可能是调用方传入的
+            # 列表；对字符串做 join 会把它拆成单个字符（'ab' -> 'a,b'），必须分开处理。
+            if isinstance(self.tags, str):
+                head_info["tags"] = self.tags
+            else:
+                head_info["tags"] = ",".join(self.tags)
         if self.page_uid is not None:
-            head_info['uid'] = self.page_uid.replace('-', '').strip()
+            head_info["uid"] = self.page_uid.replace("-", "").strip()
 
-        return '\n'.join(['- {}: {}'.format(k, v.strip()) for k, v in head_info.items()])
+        return "\n".join([f"- {k}: {v.strip()}" for k, v in head_info.items()])
 
-    def _head_info_parse(self, info: str = None):
+    def _head_info_parse(self, info: str | None = None):
         """解析文件头部形如 `- key: value` 的元信息文本，回填到实例属性。"""
         head_info = {}
         if info is None:
             return
         for line in info.split("\n"):
             line = line.strip()
-            if line.startswith('-'):
+            if line.startswith("-"):
                 line = line[1:].strip()
 
-                if ':' in line:
-                    i = line.index(':')
-                    key, value = line[:i], line[i + 1:]
+                if ":" in line:
+                    i = line.index(":")
+                    key, value = line[:i], line[i + 1 :]
                     head_info[key] = value
-        if 'uid' in head_info.keys():
-            self.page_uid = head_info['uid'].replace('-', '').strip()
-        if 'title' in head_info.keys():
-            self.title = head_info['title'].strip()
-        if 'tags' in head_info.keys():
-            self.tags = head_info['tags'].strip()
-        if 'author' in head_info.keys():
-            self.author = head_info['author'].strip()
-        if 'create_time' in head_info.keys():
-            self.create_time = head_info['create_time'].strip()
-        if 'modify_time' in head_info.keys():
-            self.modify_time = head_info['modify_time'].strip()
+        if "uid" in head_info:
+            self.page_uid = head_info["uid"].replace("-", "").strip()
+        if "title" in head_info:
+            self.title = head_info["title"].strip()
+        if "tags" in head_info:
+            self.tags = head_info["tags"].strip()
+        if "author" in head_info:
+            self.author = head_info["author"].strip()
+        if "create_time" in head_info:
+            self.create_time = head_info["create_time"].strip()
+        if "modify_time" in head_info:
+            self.modify_time = head_info["modify_time"].strip()
         return head_info
 
     def _read_ipynb(self, insert_mark=True, fill_mark=True):
         """将 `self.path` 指向的 `.ipynb` 文件转换为 Markdown 正文，并按需解析/回写头部元信息。"""
         mark = MarkdownExporter()
-        jake_notebook = nbformat.reads(
-            open(self.path, 'r').read(), as_version=4)
+        jake_notebook = nbformat.reads(self.reads(), as_version=4)
         content, _ = mark.from_notebook_node(jake_notebook)
         if len(jake_notebook.cells) == 0:
             return content
@@ -132,17 +136,24 @@ class PageDetail:
         source = str(jake_notebook.cells[0].source)
 
         # 导入头部定义的变量
-        if source.startswith('- '):
+        if source.startswith("- "):
             self._head_info_parse(source)
             del jake_notebook.cells[0]
             content, _ = mark.from_notebook_node(jake_notebook)
 
         # 信息补全
-        if (source.startswith('- ') and fill_mark) or (not source.startswith('- ') and insert_mark):
-            cell = jake_notebook.cells[0].copy()
+        if (source.startswith("- ") and fill_mark) or (
+            not source.startswith("- ") and insert_mark
+        ):
+            # 上面删掉头部 cell 后 notebook 可能已经空了（整个 ipynb 只有头部信息），
+            # 此时不能再按下标取 cell 做模板，否则 IndexError。
+            if jake_notebook.cells:
+                cell = jake_notebook.cells[0].copy()
+            else:
+                cell = nbformat.v4.new_markdown_cell()
             cell.source = self._head_info_str()
-            cell.cell_type = 'markdown'
-            cell.id = 'tribal-finnish'
+            cell.cell_type = "markdown"
+            cell.id = "tribal-finnish"
 
             jake_notebook.cells.insert(0, cell)
             self.writes(nbformat.writes(jake_notebook))
@@ -159,28 +170,28 @@ class PageDetail:
         filename, filetype = os.path.splitext(os.path.basename(self.path))
 
         self.title = self.name_convent(filename)
-        self.page_uid = str(uuid.uuid1()).replace('-', '')
+        self.page_uid = str(uuid.uuid1()).replace("-", "")
 
-        if filetype == '.ipynb':
+        if filetype == ".ipynb":
             content = self._read_ipynb()
-        elif filetype == '.md':
-            content = open(self.path, 'r').read()
+        elif filetype == ".md":
+            content = self.reads()
         else:
             # raise NotImplementedError("error {}".format(filetype))
             content = ""
 
         return content
 
-    def insert_page(self, file_info: dict, cate_info: dict = None):
+    def insert_page(self, file_info: dict, cate_info: dict | None = None):
         """
         根据本地扫描得到的文件信息与所属分类信息填充文章字段。
 
         :param file_info: 至少包含 `path`（本地文件路径）的字典
         :param cate_info: 至少包含 `cate_id`、`cate_name` 的分类信息字典
         """
-        self.path = file_info['path']
-        self.cate_id = cate_info['cate_id']
-        self.cate_name = cate_info['cate_name']
+        self.path = file_info["path"]
+        self.cate_id = cate_info["cate_id"]
+        self.cate_name = cate_info["cate_name"]
 
         self.init_page()
 
@@ -188,19 +199,27 @@ class PageDetail:
 class BlogCategoryDB(SqliteTable):
     """分类表的本地 SQLite 存储，记录本地分类与各发布渠道分类 ID 的映射关系。"""
 
-    def __init__(self, table_name='cate_table', db_path=None, *args, **kwargs):
+    def __init__(self, table_name="cate_table", db_path=None, *args, **kwargs):
         if db_path is None:
-            db_path = os.path.abspath(os.path.dirname(__file__)) + '/blog.db'
-        columns = ['cate_id', 'cate_name', 'describe', 'parent_id',
-                   'parent_name', 'cate_typecho_id', 'cate_yuque_id']
-        super(BlogCategoryDB, self).__init__(db_path=db_path,
-                                             table_name=table_name, columns=columns, *args, **kwargs)
+            db_path = os.path.abspath(os.path.dirname(__file__)) + "/blog.db"
+        columns = [
+            "cate_id",
+            "cate_name",
+            "describe",
+            "parent_id",
+            "parent_name",
+            "cate_typecho_id",
+            "cate_yuque_id",
+        ]
+        super().__init__(
+            *args, db_path=db_path, table_name=table_name, columns=columns, **kwargs
+        )
         self.create()
 
     def create(self):
         """建表（若不存在）。"""
-        self.execute("""
-                create table if not exists {} (
+        self.execute(f"""
+                create table if not exists {self.table_name} (
                 cate_id             integer       primary key AUTOINCREMENT
                ,cate_name           varchar(200)  DEFAULT ('')
                ,describe            varchar(5000) DEFAULT ('')
@@ -209,36 +228,48 @@ class BlogCategoryDB(SqliteTable):
                ,cate_typecho_id     integer       DEFAULT (-1)
                ,cate_yuque_id       integer       DEFAULT (-1)
         )
-        """.format(self.table_name))
+        """)
 
-    def update(self, properties: dict, condition: dict = None):
+    def update(self, properties: dict, condition: dict | None = None):
         """按 `condition` 更新分类记录。"""
         condition = condition or {}
         # condition.update({'cate_id': properties['cate_id']})
 
-        return super(BlogCategoryDB, self).update(properties, condition)
+        return super().update(properties, condition)
 
     def insert(self, properties: dict):
         """插入一条分类记录。"""
-        return super(BlogCategoryDB, self).insert(properties)
+        return super().insert(properties)
 
 
 class BlogPageDB(SqliteTable):
     """文章表的本地 SQLite 存储，记录本地文章与各发布渠道文章 ID 的映射关系。"""
 
-    def __init__(self, table_name='page_table', db_path=None, *args, **kwargs):
+    def __init__(self, table_name="page_table", db_path=None, *args, **kwargs):
         if db_path is None:
-            db_path = os.path.abspath(os.path.dirname(__file__)) + '/blog.db'
-        columns = ['page_id', 'page_uid', 'title', 'sub_title', 'describe', 'cate_id', 'cate_name',
-                   'page_typecho_id', 'page_yuque_id', 'path', 'tags']
-        super(BlogPageDB, self).__init__(db_path=db_path,
-                                         table_name=table_name, columns=columns, *args, **kwargs)
+            db_path = os.path.abspath(os.path.dirname(__file__)) + "/blog.db"
+        columns = [
+            "page_id",
+            "page_uid",
+            "title",
+            "sub_title",
+            "describe",
+            "cate_id",
+            "cate_name",
+            "page_typecho_id",
+            "page_yuque_id",
+            "path",
+            "tags",
+        ]
+        super().__init__(
+            *args, db_path=db_path, table_name=table_name, columns=columns, **kwargs
+        )
         self.create()
 
     def create(self):
         """建表（若不存在）。"""
-        self.execute("""
-                create table if not exists {} (
+        self.execute(f"""
+                create table if not exists {self.table_name} (
                 page_id             integer       primary key AUTOINCREMENT
                ,page_uid            varchar(200)   DEFAULT ('')
                ,title               varchar(200)   DEFAULT ('')
@@ -251,18 +282,18 @@ class BlogPageDB(SqliteTable):
                ,path                varchar(2000)  DEFAULT ('')
                ,tags                varchar(2000)  DEFAULT ('')
         )
-        """.format(self.table_name))
+        """)
 
-    def update(self, properties: dict, condition: dict = None):
+    def update(self, properties: dict, condition: dict | None = None):
         """按 `condition` 更新文章记录。"""
         condition = condition or {}
         # condition.update({'cate_id': properties['cate_id']})
 
-        return super(BlogPageDB, self).update(properties, condition)
+        return super().update(properties, condition)
 
     def insert(self, properties: dict):
         """插入一条文章记录。"""
-        return super(BlogPageDB, self).insert(properties)
+        return super().insert(properties)
 
 
 class FileTree:
@@ -270,8 +301,10 @@ class FileTree:
 
     def __init__(self, name="默认分类"):
         self.name: str = name
-        self.categories: list["FileTree"] = []
+        self.categories: list[FileTree] = []
         self.files: list[str] = []
 
     def __str__(self):
-        return "{}  {}  {}".format(self.name, ';'.join([i.__str__() for i in self.categories]), len(self.files))
+        return "{}  {}  {}".format(
+            self.name, ";".join([i.__str__() for i in self.categories]), len(self.files)
+        )
