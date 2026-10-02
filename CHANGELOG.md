@@ -52,7 +52,11 @@
 - `PageDetail._read_ipynb` 在「整个 notebook 只有一个头部信息 cell」时，删除该 cell 后
   仍按下标取 cell 做模板，抛 `IndexError`；现在改为新建 markdown cell。
 - `PageDetail` 读文件不再泄漏文件句柄（`open(...).read()` 改为 `with`）。
-- `script/__version__.md`（原为 `0.5.7`）与 `pyproject.toml` 的版本号不一致，现已同步。
+- 修复版本号漂移：`script/__version__.md`（原为 `0.5.7`）与 `pyproject.toml`（原为 `0.5.8`）长期不一致。
+  本仓库走 `funbuild` 的 `UVBuild` 路径，版本源头是 `pyproject.toml` 的 `[project].version`，
+  而版本同步只覆盖 `pyproject.toml` / `package.json` / `pubspec.yaml`，不会写 `script/__version__.md`，
+  所以后者会掉队。已确认 PyPI 上 `funblog` 此前没有任何发布（本次 0.6.0 是首个版本），
+  两处版本号现统一为 `0.6.0`；后续发版需手动保持 `script/__version__.md` 与 `pyproject.toml` 一致。
 
 ### 废弃
 
