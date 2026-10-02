@@ -1,12 +1,11 @@
 [project]
 name = "funblog"
-version = "0.5.8"
+version = "0.6.0"
 description = "本地笔记（Markdown/Jupyter Notebook）扫描工具：按目录结构建立分类-文章树并记录到本地 SQLite，再通过 XML-RPC 批量发布/更新到 Typecho 博客"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "牛哥", email = "farfarfun@qq.com" }]
 dependencies = [
     # >=1.0.4：1.0.1 的 fundata.tables_bak 用了 pandas 却没声明它，
     # 装到 1.0.1 时 `import funblog.core.meta` 会直接 ModuleNotFoundError: pandas。
@@ -19,6 +18,27 @@ dependencies = [
 
 # funsecret 只有 example/publish.py 在用（读取 Typecho 的 rpc_url / 账号密码），
 # 不是 src/funblog 的运行时依赖，因此放在 dev 组。
+
+[[project.authors]]
+name = "牛哥"
+email = "niuliangtao@qq.com"
+
+[[project.authors]]
+name = "farfarfun"
+email = "farfarfun@qq.com"
+
+[[project.maintainers]]
+name = "牛哥"
+email = "niuliangtao@qq.com"
+
+[[project.maintainers]]
+name = "farfarfun"
+email = "farfarfun@qq.com"
+
+[project.urls]
+Organization = "https://github.com/farfarfun"
+Repository = "https://github.com/farfarfun/funblog"
+Releases = "https://github.com/farfarfun/funblog/releases"
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.14", "funsecret>=1.0.0"]
 
