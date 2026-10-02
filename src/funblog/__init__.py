@@ -6,4 +6,4 @@
 # @File    : __init__.py
 # @Software: PyCharm
 
-__all__ = ['brush']
+__all__: list[str] = []

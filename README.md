@@ -1,6 +1,6 @@
 # funblog
 
-本地笔记发布工具：把本地目录下的 Markdown / Jupyter Notebook（`.md` / `.ipynb`）文件按目录结构扫描成「分类-文章」树，记录到本地 SQLite，再通过 XML-RPC（metaWeblog 协议）批量发布/更新到 [Typecho](https://typecho.org/) 博客。仓库里还带了一个尚未实现的 Yuque（语雀）发布模块的空壳，以及一批与博客发布无关的历史遗留爬虫/工具脚本（`funblog/utils/fzutils`、`funblog/utils/brush`），目前未被主流程使用，保留仅供参考。
+本地笔记发布工具：把本地目录下的 Markdown / Jupyter Notebook（`.md` / `.ipynb`）文件按目录结构扫描成「分类-文章」树，记录到本地 SQLite，再通过 XML-RPC（metaWeblog 协议）批量发布/更新到 [Typecho](https://typecho.org/) 博客。仓库里还带了一个尚未实现的 Yuque（语雀）发布模块的空壳。
 
 PyPI 上目前没有发布 `funblog` 这个包，下面只给出源码安装方式。
 
@@ -50,7 +50,6 @@ print(typecho.get_categories())
 ## 已知局限
 
 - Yuque（语雀）发布模块（`funblog/blog/yuque/`）目前是空文件，功能未实现。
-- `funblog/utils/` 下的 `fzutils`、`brush` 是历史爬虫/工具脚本合集，与博客发布主流程无关，未做维护，使用前请自行确认可用性。
 
 ---
 

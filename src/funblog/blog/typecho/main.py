@@ -187,12 +187,13 @@ class Typecho(TypechoPostMixin, TypechoPageMixin, TypechoCategoryMixin, TypechoT
 
     def _try_rpc(self, rpc_method, *args, **kw):
         """
-        执行一次 XML-RPC 调用，捕获调用异常并记录带上下文的错误日志。
+        执行一次 XML-RPC 调用，并为服务端错误记录调用上下文。
 
         :param rpc_method: 要调用的 XML-RPC 方法
         :param args: 透传给 `rpc_method` 的位置参数
         :param kw: 透传给 `rpc_method` 的关键字参数
-        :return: RPC 调用结果；调用失败时返回 None
+        :return: RPC 调用结果；服务端返回空字符串时转换为 None
+        :raises Fault: XML-RPC 服务端返回错误
         """
         res = None
         method_name = getattr(rpc_method, "_ServerProxy__name", rpc_method)
@@ -204,6 +205,5 @@ class Typecho(TypechoPostMixin, TypechoPageMixin, TypechoCategoryMixin, TypechoT
         except Fault as e:
             logger.error("Typecho RPC 调用失败，方法：{}，错误码 {}：{}".format(
                 method_name, e.faultCode, e.faultString))
-        except Exception as e:
-            logger.error("Typecho RPC 调用异常，方法：{}，原因：{}".format(method_name, e))
+            raise
         return res

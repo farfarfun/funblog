@@ -133,12 +133,9 @@ class PageDetail:
 
         # 导入头部定义的变量
         if source.startswith('- '):
-            try:
-                self._head_info_parse(source)
-                del jake_notebook.cells[0]
-                content, _ = mark.from_notebook_node(jake_notebook)
-            except Exception as e:
-                logger.error("解析 ipynb 头部元信息失败，文件：{}，原因：{}".format(self.path, e))
+            self._head_info_parse(source)
+            del jake_notebook.cells[0]
+            content, _ = mark.from_notebook_node(jake_notebook)
 
         # 信息补全
         if (source.startswith('- ') and fill_mark) or (not source.startswith('- ') and insert_mark):
