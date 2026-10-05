@@ -23,14 +23,11 @@ class Tag(Meta):
 @dataclass
 class Content:
     """
-    Post needs at least: title, description , category.
-    Page needs at least: title, description.
+    文章或页面的通用内容。
 
-    text_more will be connected with description as description+'\n<!--more-->\n'+text_more by Typecho.
-    tags should be split by ',' like 'tag1, tag2'
-    created should be timestamp.
-    allow_feed has no effect because Typecho not use
-    status could be 'publish' or 'save' or 'private'.
+    文章至少需要 ``title``、``description`` 和分类；页面至少需要前两项。
+    Typecho 会用 ``<!--more-->`` 连接 ``description`` 与 ``mt_text_more``；标签应以逗号分隔，
+    ``created`` 为时间戳，``post_status`` 可为 ``publish``、``save`` 或 ``private``。
     """
 
     title: str
@@ -85,7 +82,7 @@ class Comment:
     comment_author_email: int = 0
     comment_author_url: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.author:
             self.comment_author = 1
         if self.author_email:

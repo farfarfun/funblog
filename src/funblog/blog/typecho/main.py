@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from typing import Any, Callable
 from xmlrpc.client import Fault, ServerProxy
 
 from .log import logger
@@ -8,11 +9,11 @@ from .models import Attachment, Category, Comment, Page, Post
 class TypechoPostMixin:
     """文章（Post）相关的 metaWeblog / WordPress 兼容 XML-RPC 接口。"""
 
-    def get_posts(self, num: int = 10) -> list[dict] | None:
+    def get_posts(self, num: int = 10) -> list[dict[str, Any]] | None:
         """获取最近 `num` 篇文章。"""
         return self.try_rpc(self.s.metaWeblog.getRecentPosts, num)
 
-    def get_post(self, post_id: int) -> dict | None:
+    def get_post(self, post_id: int) -> dict[str, Any] | None:
         """
         按 ID 获取单篇文章。
 
@@ -27,8 +28,8 @@ class TypechoPostMixin:
         """
         新建一篇文章。
 
-        Post's status will cover publish, and if you only save post, the post id will only be '0'
-        If Post's categories are not created, it will only create the first category
+        `post` 的状态字段优先于 `publish`；仅保存草稿时服务端可能返回 ``"0"``。
+        若文章分类尚未创建，Typecho 只会创建第一个分类。
         """
         return self.try_rpc(self.s.metaWeblog.newPost, post, publish)
 
@@ -59,15 +60,15 @@ class TypechoPostMixin:
 class TypechoPageMixin:
     """页面（Page）相关的 metaWeblog / WordPress 兼容 XML-RPC 接口。"""
 
-    def get_pages(self) -> list[dict] | None:
+    def get_pages(self) -> list[dict[str, Any]] | None:
         """获取全部页面列表。"""
         return self.try_rpc(self.s.wp.getPages)
 
-    def get_page(self, page_id: int) -> dict | None:
+    def get_page(self, page_id: int) -> dict[str, Any] | None:
         """
         按 ID 获取单个页面。
 
-        WARNING: Different from other API!
+        注意：该接口的 XML-RPC 参数顺序与其他接口不同。
         """
         return self._try_rpc(
             self.s.wp.getPage, self.blog_id, page_id, self.username, self.password
@@ -77,7 +78,7 @@ class TypechoPageMixin:
         """
         新建一个页面。
 
-        Page's status will cover publish, and if you only save post, the post id will only be '0'
+        `page` 的状态字段优先于 `publish`；仅保存草稿时服务端可能返回 ``"0"``。
         """
         return self.try_rpc(self.s.metaWeblog.newPost, page, publish)
 
@@ -95,7 +96,7 @@ class TypechoPageMixin:
 class TypechoCategoryMixin:
     """分类（Category）相关的 metaWeblog / WordPress 兼容 XML-RPC 接口。"""
 
-    def get_categories(self) -> dict | None:
+    def get_categories(self) -> dict[str, Any] | None:
         """获取全部分类。"""
         return self.try_rpc(self.s.metaWeblog.getCategories)
 
@@ -111,7 +112,7 @@ class TypechoCategoryMixin:
 class TypechoTagMixin:
     """标签（Tag）相关的 WordPress 兼容 XML-RPC 接口。"""
 
-    def get_tags(self) -> list[dict] | None:
+    def get_tags(self) -> list[dict[str, Any]] | None:
         """获取全部标签。"""
         return self.try_rpc(self.s.wp.getTags)
 
@@ -125,7 +126,7 @@ class TypechoAttachmentMixin:
         mime_type: str | None = None,
         page_size: int | None = None,
         page_num: int | None = None,
-    ) -> list[dict] | None:
+    ) -> list[dict[str, Any]] | None:
         """按条件筛选并获取媒体库附件列表。"""
         struct = {}
         if post_id:
@@ -138,11 +139,11 @@ class TypechoAttachmentMixin:
             struct.update({"offset": page_num})
         return self.try_rpc(self.s.wp.getMediaLibrary, struct)
 
-    def get_attachment(self, attachment_id) -> dict | None:
+    def get_attachment(self, attachment_id: int) -> dict[str, Any] | None:
         """按 ID 获取单个附件。"""
         return self.try_rpc(self.s.wp.getMediaItem, attachment_id)
 
-    def new_attachment(self, data: Attachment):
+    def new_attachment(self, data: Attachment) -> dict[str, Any] | None:
         """上传一个新附件。"""
         return self.try_rpc(self.s.wp.uploadFile, data)
 
@@ -156,7 +157,7 @@ class TypechoCommentMixin:
         post_id: int | None = None,
         page_size: int | None = None,
         page_num: int | None = None,
-    ) -> list[dict] | None:
+    ) -> list[dict[str, Any]] | None:
         """按条件筛选并获取评论列表。"""
         struct = {}
         if status:
@@ -169,7 +170,7 @@ class TypechoCommentMixin:
             struct.update({"offset": page_num})
         return self.try_rpc(self.s.wp.getComments, struct)
 
-    def get_comment(self, comment_id: int) -> dict | None:
+    def get_comment(self, comment_id: int) -> dict[str, Any] | None:
         """按 ID 获取单条评论。"""
         return self.try_rpc(self.s.wp.getComment, comment_id)
 
@@ -224,13 +225,17 @@ class Typecho(
         # blog id could be any number.
         self.blog_id = 1
 
-    def try_rpc(self, rpc_method, *args, **kw):
+    def try_rpc(
+        self, rpc_method: Callable[..., Any], *args: Any, **kw: Any
+    ) -> Any:
         """调用 `rpc_method`，自动补上 `blog_id`/`username`/`password` 鉴权参数。"""
         return self._try_rpc(
             rpc_method, self.blog_id, self.username, self.password, *args, **kw
         )
 
-    def _try_rpc(self, rpc_method, *args, **kw):
+    def _try_rpc(
+        self, rpc_method: Callable[..., Any], *args: Any, **kw: Any
+    ) -> Any:
         """
         执行一次 XML-RPC 调用，并为服务端错误记录调用上下文。
 
