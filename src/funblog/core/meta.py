@@ -1,6 +1,7 @@
 import os
 import string
 import uuid
+from typing import Any
 
 import nbformat
 from farlog import getLogger
@@ -13,7 +14,7 @@ logger = getLogger("funblog")
 class CateDetail:
     """分类详情，对应本地 SQLite 分类表的一行记录，以及各发布渠道的分类 ID 映射。"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.cate_id = None
         self.cate_name = None
         self.describe = None
@@ -23,11 +24,11 @@ class CateDetail:
         self.cate_yuque_id = None
         self.from_dict(kwargs)
 
-    def from_dict(self, properties: dict):
+    def from_dict(self, properties: dict[str, Any]) -> None:
         """用字典批量更新实例属性。"""
         self.__dict__.update(properties)
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         """导出实例属性为字典，便于写入数据库。"""
         result = {}
         result.update(self.__dict__)
@@ -37,7 +38,7 @@ class CateDetail:
 class PageDetail:
     """文章详情，对应本地 SQLite 文章表的一行记录，负责本地文件的读写与头部元信息解析。"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.page_id = 0
         self.page_uid = ""
         self.title = ""
@@ -54,23 +55,23 @@ class PageDetail:
 
         self.from_dict(kwargs)
 
-    def from_dict(self, properties: dict):
+    def from_dict(self, properties: dict[str, Any]) -> None:
         """用字典批量更新实例属性。"""
         self.__dict__.update(properties)
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         """导出实例属性为字典（不含自增主键 `page_id`），便于写入数据库。"""
         result = {}
         result.update(self.__dict__)
         result.pop("page_id")
         return result
 
-    def reads(self):
+    def reads(self) -> str:
         """读取 `self.path` 指向的本地文件全文内容。"""
         with open(self.path, "r") as f:
             return f.read()
 
-    def writes(self, s):
+    def writes(self, s: str) -> None:
         """将内容整体写回 `self.path` 指向的本地文件（覆盖写）。"""
         with open(self.path, "w") as f:
             f.write(s)
@@ -161,11 +162,11 @@ class PageDetail:
         return content
 
     @property
-    def content(self):
+    def content(self) -> str:
         """本文章的正文内容（Markdown 文本），按需解析 `.md`/`.ipynb`。"""
         return self.init_page()
 
-    def init_page(self):
+    def init_page(self) -> str:
         """根据 `self.path` 的文件名/扩展名初始化标题、UID，并解析出正文内容。"""
         filename, filetype = os.path.splitext(os.path.basename(self.path))
 
@@ -182,7 +183,9 @@ class PageDetail:
 
         return content
 
-    def insert_page(self, file_info: dict, cate_info: dict | None = None):
+    def insert_page(
+        self, file_info: dict[str, Any], cate_info: dict[str, Any] | None = None
+    ) -> None:
         """
         根据本地扫描得到的文件信息与所属分类信息填充文章字段。
 
@@ -199,7 +202,13 @@ class PageDetail:
 class BlogCategoryDB(SqliteTable):
     """分类表的本地 SQLite 存储，记录本地分类与各发布渠道分类 ID 的映射关系。"""
 
-    def __init__(self, table_name="cate_table", db_path=None, *args, **kwargs):
+    def __init__(
+        self,
+        table_name: str = "cate_table",
+        db_path: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         if db_path is None:
             db_path = os.path.abspath(os.path.dirname(__file__)) + "/blog.db"
         columns = [
@@ -216,7 +225,7 @@ class BlogCategoryDB(SqliteTable):
         )
         self.create()
 
-    def create(self):
+    def create(self) -> None:
         """建表（若不存在）。"""
         self.execute(f"""
                 create table if not exists {self.table_name} (
@@ -230,14 +239,16 @@ class BlogCategoryDB(SqliteTable):
         )
         """)
 
-    def update(self, properties: dict, condition: dict | None = None):
+    def update(
+        self, properties: dict[str, Any], condition: dict[str, Any] | None = None
+    ) -> Any:
         """按 `condition` 更新分类记录。"""
         condition = condition or {}
         # condition.update({'cate_id': properties['cate_id']})
 
         return super().update(properties, condition)
 
-    def insert(self, properties: dict):
+    def insert(self, properties: dict[str, Any]) -> Any:
         """插入一条分类记录。"""
         return super().insert(properties)
 
@@ -245,7 +256,13 @@ class BlogCategoryDB(SqliteTable):
 class BlogPageDB(SqliteTable):
     """文章表的本地 SQLite 存储，记录本地文章与各发布渠道文章 ID 的映射关系。"""
 
-    def __init__(self, table_name="page_table", db_path=None, *args, **kwargs):
+    def __init__(
+        self,
+        table_name: str = "page_table",
+        db_path: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         if db_path is None:
             db_path = os.path.abspath(os.path.dirname(__file__)) + "/blog.db"
         columns = [
@@ -266,7 +283,7 @@ class BlogPageDB(SqliteTable):
         )
         self.create()
 
-    def create(self):
+    def create(self) -> None:
         """建表（若不存在）。"""
         self.execute(f"""
                 create table if not exists {self.table_name} (
@@ -284,14 +301,16 @@ class BlogPageDB(SqliteTable):
         )
         """)
 
-    def update(self, properties: dict, condition: dict | None = None):
+    def update(
+        self, properties: dict[str, Any], condition: dict[str, Any] | None = None
+    ) -> Any:
         """按 `condition` 更新文章记录。"""
         condition = condition or {}
         # condition.update({'cate_id': properties['cate_id']})
 
         return super().update(properties, condition)
 
-    def insert(self, properties: dict):
+    def insert(self, properties: dict[str, Any]) -> Any:
         """插入一条文章记录。"""
         return super().insert(properties)
 
@@ -299,12 +318,12 @@ class BlogPageDB(SqliteTable):
 class FileTree:
     """本地目录扫描结果的树形结构：一个分类节点，含子分类与本分类下的文件路径列表。"""
 
-    def __init__(self, name="默认分类"):
+    def __init__(self, name: str = "默认分类") -> None:
         self.name: str = name
         self.categories: list[FileTree] = []
         self.files: list[str] = []
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{}  {}  {}".format(
             self.name, ";".join([i.__str__() for i in self.categories]), len(self.files)
         )

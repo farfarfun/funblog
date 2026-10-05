@@ -18,37 +18,66 @@ pip install -e .
 
 运行时依赖 `fundata`（提供 `SqliteTable` 等基础能力）、`nbformat`、`nbconvert`（用于解析 `.ipynb`）、`farlog`、`tqdm`，均已写入 `pyproject.toml`。`funbuild` 只是发布本包时用到的构建工具，不是运行时依赖，无需单独安装即可使用本包。
 
-## 用法示例
+## 可离线运行的最小示例
 
 ```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
 from funblog.publish.core import BlogManage
 
-# path_root: 本地笔记根目录，子目录会被当作分类，.md/.ipynb 文件会被当作文章
-blog = BlogManage(path_root="/path/to/notes", db_path="/path/to/blog.db")
+with TemporaryDirectory() as directory:
+    root = Path(directory) / "笔记"
+    category = root / "技术"
+    category.mkdir(parents=True)
+    (category / "01-第一篇.md").write_text("# 正文\n", encoding="utf-8")
 
-# 1. 扫描本地文件，写入分类表/文章表
+    blog = BlogManage(path_root=str(root), db_path=str(root / "blog.db"))
+    blog.local_scan()
+    print(blog.page_db.select_all()[0]["title"])  # 第一篇
+```
+
+该示例只扫描临时目录并写入临时 SQLite 数据库，不会连接任何远程服务。运行前按上面的安装步骤执行 `pip install funblog`；从源码运行则执行 `pip install -e .`。
+
+## 发布到 Typecho
+
+远程发布需要可访问的 Typecho XML-RPC 地址和一个有发布权限的账号。将凭据放入环境变量，避免写入脚本或仓库：
+
+```bash
+export FUNBLOG_TYPECHO_RPC_URL="https://your-blog.example/action/xmlrpc"
+export FUNBLOG_TYPECHO_USERNAME="your-username"
+export FUNBLOG_TYPECHO_PASSWORD="your-password"
+```
+
+```python
+import os
+
+from funblog.publish.core import BlogManage
+
+blog = BlogManage(path_root="./notes", db_path="./blog.db")
 blog.local_scan()
 
-# 2. 发布到 Typecho（通过 XML-RPC）
 blog.publish_typecho(
-    rpc_url="https://your-blog.com/action/xmlrpc",
-    username="your-username",
-    password="your-password",
+    rpc_url=os.environ["FUNBLOG_TYPECHO_RPC_URL"],
+    username=os.environ["FUNBLOG_TYPECHO_USERNAME"],
+    password=os.environ["FUNBLOG_TYPECHO_PASSWORD"],
 )
 ```
 
 `BlogManage` 内部用 `BlogCategoryDB` / `BlogPageDB`（均基于 SQLite）记录分类和文章的本地 id 与 Typecho 端 id 的对应关系，重复运行 `local_scan()` + `publish_typecho()` 可以做到增量更新：已发布过的文章会走 `edit_page`，未发布过的走 `new_page`。
 
+仓库中的 `example/publish.py` 使用组织的 `funsecret` 读取同一组凭据。该示例供开发环境使用，先执行 `pip install -e ".[dev]"`（会安装 `funsecret>=1.4.84`），再在 `funsecret` 的密钥存储中配置 `blog/typecho/rpc_url`、`blog/typecho/username` 和 `blog/typecho/password` 三个键后运行。
+
 底层的 Typecho 客户端 `funblog.blog.typecho.Typecho` 封装了 metaWeblog / WordPress 兼容的 XML-RPC 接口（文章、页面、分类、标签、附件、评论），可以单独使用：
 
 ```python
+import os
+
 from funblog.blog.typecho import Typecho
 
-typecho = Typecho(
-    rpc_url="https://your-blog.com/action/xmlrpc",
-    username="your-username",
-    password="your-password",
-)
+typecho = Typecho(rpc_url=os.environ["FUNBLOG_TYPECHO_RPC_URL"],
+                  username=os.environ["FUNBLOG_TYPECHO_USERNAME"],
+                  password=os.environ["FUNBLOG_TYPECHO_PASSWORD"])
 print(typecho.get_categories())
 ```
 

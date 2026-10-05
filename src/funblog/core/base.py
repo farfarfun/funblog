@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Any
 
 from .meta import CateDetail as Cate
 from .meta import PageDetail as Page
@@ -12,58 +13,78 @@ class PublishBase:
     未实现的方法调用时会抛出 ``NotImplementedError``。
     """
 
-    def __init__(self, name="default", *args, **kwargs):
+    def __init__(self, name: str = "default", *args: Any, **kwargs: Any) -> None:
         """
         :param name: 发布渠道名称，用于区分不同的发布目标
         """
         self.name = name
 
     @abstractmethod
-    def get_pages(self, nums=10, *args, **kwargs):
+    def get_pages(
+        self, nums: int = 10, *args: Any, **kwargs: Any
+    ) -> list[dict[str, Any]] | None:
         """获取文章列表，子类必须实现。"""
         raise NotImplementedError("get_pages 未实现")
 
     @abstractmethod
-    def get_page(self, page_id, *args, **kwargs):
+    def get_page(
+        self, page_id: int, *args: Any, **kwargs: Any
+    ) -> dict[str, Any] | None:
         """按 ID 获取单篇文章，子类必须实现。"""
         raise NotImplementedError("get_page 未实现")
 
     @abstractmethod
-    def new_page(self, page: Page, *args, **kwargs):
+    def new_page(
+        self, page: Page, *args: Any, **kwargs: Any
+    ) -> str | None:
         """新建一篇文章，子类必须实现。"""
         raise NotImplementedError("new_page 未实现")
 
     @abstractmethod
-    def edit_page(self, page_id, page: Page, *args, **kwargs):
+    def edit_page(
+        self, page_id: int, page: Page, *args: Any, **kwargs: Any
+    ) -> str | None:
         """编辑一篇已存在的文章，子类必须实现。"""
         raise NotImplementedError("edit_page 未实现")
 
     @abstractmethod
-    def del_page(self, page_id, *args, **kwargs):
+    def del_page(
+        self, page_id: int, *args: Any, **kwargs: Any
+    ) -> bool | None:
         """删除一篇文章，子类必须实现。"""
         raise NotImplementedError("del_page 未实现")
 
     @abstractmethod
-    def get_cates(self, nums=10, *args, **kwargs):
+    def get_cates(
+        self, nums: int = 10, *args: Any, **kwargs: Any
+    ) -> list[dict[str, Any]] | None:
         """获取分类列表，子类必须实现。"""
         raise NotImplementedError("get_cates 未实现")
 
     @abstractmethod
-    def get_cate(self, cate_id, *args, **kwargs):
+    def get_cate(
+        self, cate_id: int, *args: Any, **kwargs: Any
+    ) -> dict[str, Any] | None:
         """按 ID 获取单个分类，子类必须实现。"""
         raise NotImplementedError("get_cate 未实现")
 
     @abstractmethod
-    def new_cate(self, cate: Cate, *args, **kwargs):
+    def new_cate(
+        self, cate: Cate, *args: Any, **kwargs: Any
+    ) -> str | None:
         """新建一个分类，子类必须实现。"""
         raise NotImplementedError("new_cate 未实现")
 
     @abstractmethod
-    def edit_cate(self, cate_id, cate: Cate, *args, **kwargs):
+    def edit_cate(
+        self, cate_id: int, cate: Cate, *args: Any, **kwargs: Any
+    ) -> str | None:
         """编辑一个已存在的分类，子类必须实现。"""
         raise NotImplementedError("edit_cate 未实现")
 
     @abstractmethod
-    def del_cate(self, cate_id, *args, **kwargs):
+    def del_cate(
+        self, cate_id: int, *args: Any, **kwargs: Any
+    ) -> bool | None:
         """删除一个分类，子类必须实现。"""
         raise NotImplementedError("del_cate 未实现")
