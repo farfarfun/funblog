@@ -40,7 +40,7 @@ Organization = "https://github.com/farfarfun"
 Repository = "https://github.com/farfarfun/funblog"
 Releases = "https://github.com/farfarfun/funblog/releases"
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.14", "funsecret>=1.4.84"]
+dev = ["pytest>=8", "ruff>=0.14", "funbuild>=1.6.66", "funsecret>=1.4.84"]
 
 [build-system]
 requires = ["hatchling"]

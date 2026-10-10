@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from dataclasses import asdict
-from typing import Any, Callable
+from typing import Any
 from xmlrpc.client import Fault, ServerProxy
 
 from .log import logger
@@ -211,7 +212,7 @@ class Typecho(
     即可调用文章、页面、分类、标签、附件、评论相关方法。
     """
 
-    def __init__(self, rpc_url: str, username: str, password: str):
+    def __init__(self, rpc_url: str, username: str, password: str) -> None:
         """
         :param rpc_url: Typecho 站点的 XML-RPC 调用地址
         :param username: 登录用户名
@@ -225,17 +226,13 @@ class Typecho(
         # blog id could be any number.
         self.blog_id = 1
 
-    def try_rpc(
-        self, rpc_method: Callable[..., Any], *args: Any, **kw: Any
-    ) -> Any:
+    def try_rpc(self, rpc_method: Callable[..., Any], *args: Any, **kw: Any) -> Any:
         """调用 `rpc_method`，自动补上 `blog_id`/`username`/`password` 鉴权参数。"""
         return self._try_rpc(
             rpc_method, self.blog_id, self.username, self.password, *args, **kw
         )
 
-    def _try_rpc(
-        self, rpc_method: Callable[..., Any], *args: Any, **kw: Any
-    ) -> Any:
+    def _try_rpc(self, rpc_method: Callable[..., Any], *args: Any, **kw: Any) -> Any:
         """
         执行一次 XML-RPC 调用，并为服务端错误记录调用上下文。
 

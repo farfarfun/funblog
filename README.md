@@ -16,7 +16,13 @@ cd funblog
 pip install -e .
 ```
 
-运行时依赖 `fundata`（提供 `SqliteTable` 等基础能力）、`nbformat`、`nbconvert`（用于解析 `.ipynb`）、`farlog`、`tqdm`，均已写入 `pyproject.toml`。`funbuild` 只是发布本包时用到的构建工具，不是运行时依赖，无需单独安装即可使用本包。
+运行时依赖 `fundata`（提供 `SqliteTable` 等基础能力）、`nbformat`、`nbconvert`（用于解析 `.ipynb`）、`farlog`、`tqdm`，均已写入 `pyproject.toml`。`funbuild` 是发布本包时使用的开发工具，不是运行时依赖。
+
+开发或运行 `example/publish.py` 前安装开发依赖：
+
+```bash
+uv sync --group dev
+```
 
 ## 可离线运行的最小示例
 
@@ -66,7 +72,7 @@ blog.publish_typecho(
 
 `BlogManage` 内部用 `BlogCategoryDB` / `BlogPageDB`（均基于 SQLite）记录分类和文章的本地 id 与 Typecho 端 id 的对应关系，重复运行 `local_scan()` + `publish_typecho()` 可以做到增量更新：已发布过的文章会走 `edit_page`，未发布过的走 `new_page`。
 
-仓库中的 `example/publish.py` 使用组织的 `funsecret` 读取同一组凭据。该示例供开发环境使用，先执行 `pip install -e ".[dev]"`（会安装 `funsecret>=1.4.84`），再在 `funsecret` 的密钥存储中配置 `blog/typecho/rpc_url`、`blog/typecho/username` 和 `blog/typecho/password` 三个键后运行。
+仓库中的 `example/publish.py` 使用组织的 `funsecret` 读取同一组凭据。该示例供开发环境使用；先执行上面的 `uv sync --group dev`，再在 `funsecret` 的密钥存储中配置 `blog/typecho/rpc_url`、`blog/typecho/username` 和 `blog/typecho/password` 三个键后运行。
 
 底层的 Typecho 客户端 `funblog.blog.typecho.Typecho` 封装了 metaWeblog / WordPress 兼容的 XML-RPC 接口（文章、页面、分类、标签、附件、评论），可以单独使用：
 
@@ -84,6 +90,18 @@ print(typecho.get_categories())
 ## 已知局限
 
 - Yuque（语雀）发布模块（`funblog/blog/yuque/`）目前是空文件，功能未实现。
+
+## 构建与发布
+
+正式发布前，先运行测试与静态检查：
+
+```bash
+uv run pytest -q
+uv run ruff check .
+uv run ruff format --check .
+```
+
+确认 `CHANGELOG.md` 已更新后，执行 `uv run funbuild build` 完成版本递增、构建、安装校验、发布、提交和打标签。该命令会推送发布结果，仅应在准备正式发布时执行。
 
 ---
 
